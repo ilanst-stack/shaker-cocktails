@@ -10,6 +10,14 @@ import ErrDetails, { errText } from './ErrDetails.jsx';
 
 const GLASS_HE = { tall: 'כוס היי-בול', short: 'כוס נמוכה (רוקס)', martini: 'כוס קוקטייל', flute: 'כוס שמפניה', wine: 'כוס יין', mug: 'ספל', shot: 'כוס צ׳ייסר' };
 
+// צבע טקסט קריא על רקע נתון: לבן על רקע כהה, שחור על רקע בהיר
+export function textOn(hex) {
+  const m = String(hex).replace('#', '');
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(m.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum < 0.22 ? '#fff' : '#111';
+}
+
 export function splitSteps(text) {
   const parts = String(text || '').replace(/\r/g, ' ').split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 2);
   while (parts.length > 6) { const a = parts.splice(parts.length - 2, 2); parts.push(a.join(' ')); }
@@ -83,7 +91,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             <div className="glass-wrap"><GlassArt drink={d} width={170} /></div>
             <div className="callouts">
               {callouts.map((i, k) => (
-                <div key={k} className="callout" style={{ background: missingSet.has(i.name) ? '#FFD1CF' : k % 3 === 1 ? colorOf(i.name) : '#fff' }}>
+                <div key={k} className="callout" style={(() => { const bg = missingSet.has(i.name) ? '#FFD1CF' : k % 3 === 1 ? colorOf(i.name) : '#fff'; return { background: bg, color: textOn(bg) }; })()}>
                   <b>{fmtIngredient(i)}</b>
                   <span>{heName(i.name)}{missingSet.has(i.name) ? ' (חסר!)' : ''}</span>
                 </div>
