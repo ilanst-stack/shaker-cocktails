@@ -160,3 +160,5 @@ button { cursor: pointer; }
 .toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) rotate(-2deg); background: var(--ink); color: var(--yellow); padding: 8px 18px; font: 700 22px var(--display); z-index: 60; border: 3px solid var(--yellow); }
 
 .version { font: 700 12px var(--body); background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 1px 8px; }
+.logo-box { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 6px 12px; transform: rotate(-2deg); }
+.logo-word { display: flex; flex-direction: column; font-family: 'Jost', sans-serif; font-weight: 600; letter-spacing: 0.04em; color: #0C0D0C; }

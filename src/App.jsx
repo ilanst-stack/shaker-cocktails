@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { isConfigured, watchUser, logout } from './firebase.js';
 import { useUserData } from './data/userData.js';
 import { VERSION } from './version.js';
+import Logo from './components/Logo.jsx';
 import { loadDrinks, allIngredientNames } from './data/cocktails.js';
 import { buildIndex } from './data/match.js';
 import Login from './components/Login.jsx';
@@ -20,7 +21,7 @@ export default function App() {
   if (!isConfigured) {
     return (
       <main className="center dots">
-        <div className="logo">שייקר!</div>
+        <Logo size={40} />
         <div className="bubble" style={{ maxWidth: 360 }}><b>חסרים פרטי Firebase</b>יש להדביק אותם בקובץ src/firebase-config.js</div>
       </main>
     );
@@ -33,7 +34,7 @@ export default function App() {
 function Loading({ text, progress }) {
   return (
     <main className="center dots" aria-busy="true">
-      <div className="logo">שייקר!</div>
+      <Logo size={40} />
       <div style={{ font: '700 30px var(--display)' }}>{text}</div>
       {progress != null && <div className="progress" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}><div style={{ width: `${progress * 100}%` }} /></div>}
     </main>
@@ -79,7 +80,7 @@ function Main({ user }) {
 
   if (error) return <Loading text={`שגיאה בגישה לנתונים: ${error.code || error.message}`} />;
   if (loadErr) return (
-    <main className="center dots"><div className="logo">שייקר!</div><div className="bubble"><b>לא הצלחתי לטעון מתכונים</b>{loadErr}</div><button className="btn red" onClick={() => load(true)}>לנסות שוב</button></main>
+    <main className="center dots"><Logo size={40} /><div className="bubble"><b>לא הצלחתי לטעון מתכונים</b>{loadErr}</div><button className="btn red" onClick={() => load(true)}>לנסות שוב</button></main>
   );
   if (!drinks || !data || tab === null) return <Loading text="מערבב את המאגר…" progress={drinks ? null : progress} />;
 
@@ -90,7 +91,7 @@ function Main({ user }) {
     <div className="app dots">
       <header className="topbar">
         <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>
-          <div className="logo">שייקר!</div>
+          <Logo size={22} />
           <span className="version" dir="ltr">v{VERSION}</span>
         </div>
         <button className="icon-btn" style={{ background: '#1FA3D9', color: '#fff', font: '700 24px var(--display)' }}

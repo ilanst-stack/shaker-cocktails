@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { loginWithGoogle } from '../firebase.js';
+import Logo from './Logo.jsx';
 
 export default function Login() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   return (
     <main className="center dots">
-      <div className="logo" style={{ fontSize: 72, padding: '4px 26px 0' }}>שייקר!</div>
+      <Logo size={48} />
       <div className="bubble" style={{ maxWidth: 340 }}>
         <b>מה יש לך בבר? אני אגיד לך מה למזוג!</b>
         <div style={{ marginTop: 6, fontWeight: 500 }}>רושמים את המצרכים, מקבלים קוקטיילים, מדרגים — והאפליקציה לומדת את הטעם שלך.</div>
