@@ -50,7 +50,13 @@ button { cursor: pointer; }
 .ghost { background: transparent; border: none; padding: 0; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
 /* צ'יפים */
-.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin: 0 -16px; padding-inline: 16px; scrollbar-width: none; }
+.scrollrow { position: relative; }
+.scrollrow.inset { margin: 0 -16px; }
+.scrollrow.inset .chips { padding-inline: 16px; }
+.sr-arrow { position: absolute; top: 4px; z-index: 3; width: 38px; height: 44px; border: 3px solid var(--ink); background: var(--ink); color: var(--yellow); font: 700 30px/1 var(--display); padding: 0 0 4px; box-shadow: 2px 2px 0 var(--red); }
+.sr-start { right: 0; border-radius: 0 0 0 999px; border-radius: 999px 0 0 999px; }
+.sr-end { left: 0; border-radius: 0 999px 999px 0; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 10px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .chips::-webkit-scrollbar { display: none; }
 .chip { flex-shrink: 0; min-height: 44px; padding: 4px 16px; border: 3px solid var(--ink); border-radius: 999px; font: 700 22px var(--display); background: #fff; box-shadow: 3px 3px 0 var(--ink); white-space: nowrap; }
 .chip[aria-pressed='true'] { background: var(--ink); color: var(--yellow); }
@@ -61,6 +67,14 @@ button { cursor: pointer; }
 .seg button { flex: 1; min-height: 44px; border: none; background: transparent; font: 700 22px var(--display); }
 .seg button + button { border-right: 3px solid var(--ink); }
 .seg button[aria-pressed='true'] { background: var(--red); color: #fff; }
+
+/* מיון */
+.sortbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #fff; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 6px 10px; margin-top: 4px; }
+.sortbar label { font: 700 22px var(--display); }
+.sortbar select { flex: 1; min-width: 150px; min-height: 40px; border: 2.5px solid var(--ink); background: var(--yellow); font: 700 15px var(--body); padding: 0 8px; border-radius: 0; }
+.dir-btn { min-height: 40px; border: 2.5px solid var(--ink); background: var(--ink); color: var(--yellow); font: 700 14px var(--body); padding: 0 10px; }
+.stat { display: inline-flex; gap: 3px; align-items: center; }
+.stat.hl { background: var(--yellow); border: 2px solid var(--ink); padding: 0 5px; border-radius: 4px; }
 
 /* כרטיס קוקטייל */
 .cards { display: flex; flex-direction: column; gap: 14px; }

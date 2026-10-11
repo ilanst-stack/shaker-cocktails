@@ -1,21 +1,20 @@
-import { useMemo, useState } from 'react';
-import { GROUPS, groupOf, norm, getGroup } from '../data/ingredients.js';
+import { useEffect, useMemo, useState } from 'react';
+import { GROUPS, groupOf, norm, getGroup, unitOf, defaultAmount, UNIT_HE } from '../data/ingredients.js';
 import { IconTrash, IconPlus, IconSearch } from './Icons.jsx';
+import ScanShelf from './ScanShelf.jsx';
+import ScrollRow from './ScrollRow.jsx';
 
 const QUICK = ['vodka', 'gin', 'white rum', 'tequila', 'whiskey', 'triple sec', 'lime', 'lemon', 'sugar', 'soda water', 'cola', 'tonic water', 'orange juice', 'mint', 'ginger beer', 'cream'];
 const KIND_ORDER = ['spirit', 'liqueur', 'wine', 'juice', 'mixer', 'fresh', 'sweet', 'dairy', 'garnish'];
 const KIND_HE = { spirit: 'אלכוהול', liqueur: 'ליקרים', wine: 'יין ובירה', juice: 'מיצים', mixer: 'מוגזים ומשקאות', fresh: 'פירות ועשבים', sweet: 'ממתיקים', dairy: 'חלב וביצים', garnish: 'תבלינים וקישוטים', other: 'אחר' };
 
-function defaultAmount(kind) {
-  if (kind === 'spirit' || kind === 'liqueur' || kind === 'wine') return 700;
-  if (kind === 'juice' || kind === 'mixer') return 1500;
-  return 500;
-}
-
-export function newItem(nameOrKey) {
+export function newItem(nameOrKey, amount) {
   const g = getGroup(nameOrKey) || groupOf(nameOrKey);
-  if (g) return { key: g.key, he: g.he, kind: g.kind, unlimited: !!g.unlimited, amount: g.unlimited ? null : defaultAmount(g.kind) };
-  return { key: norm(nameOrKey), he: nameOrKey, kind: 'other', unlimited: false, amount: 500 };
+  if (g) {
+    const unlimited = amount == null && !!g.unlimited;
+    return { key: g.key, he: g.he, kind: g.kind, unit: unitOf(g.key), unlimited, amount: unlimited ? null : amount ?? defaultAmount(g.key, g.kind) };
+  }
+  return { key: norm(nameOrKey), he: nameOrKey, kind: 'other', unit: 'ml', unlimited: false, amount: amount ?? 500 };
 }
 
 export default function Inventory({ inventory, setInventory, ingredientNames }) {
@@ -74,13 +73,15 @@ export default function Inventory({ inventory, setInventory, ingredientNames }) 
           )}
         </div>
         <div style={{ fontSize: 13, fontWeight: 700, margin: '12px 0 4px' }}>הוספה מהירה</div>
-        <div className="chips" style={{ margin: 0, padding: '4px 0 6px', flexWrap: 'wrap' }}>
+        <ScrollRow label="הוספה מהירה" inset={false}>
           {QUICK.filter((k) => !have.has(k)).map((k) => (
             <button key={k} className="chip sm" onClick={() => add(k)}><IconPlus /> {getGroup(k).he}</button>
           ))}
-        </div>
+        </ScrollRow>
         <p style={{ fontSize: 12, margin: '6px 0 0' }} className="muted">מים וקרח נחשבים תמיד קיימים.</p>
       </div>
+
+      <ScanShelf inventory={inventory} setInventory={setInventory} />
 
       {inventory.length === 0 && (
         <div className="bubble" style={{ marginTop: 22 }}><b>הבר ריק! תתחיל להוסיף בקבוקים.</b></div>
@@ -104,17 +105,19 @@ function InvRow({ it, onChange, onRemove }) {
   const [val, setVal] = useState(it.amount ?? '');
   const g = getGroup(it.key);
   const id = `amt-${it.key.replace(/\W/g, '')}`;
+  const unit = it.unit || unitOf(it.key);
+  useEffect(() => { setVal(it.amount ?? ''); }, [it.amount]);
   return (
     <div className="inv-item">
       <span className="dot" style={{ background: g?.color || '#F2B705' }} />
       <div className="n">{it.he}{it.he !== it.key && !g && <small dir="ltr">{it.key}</small>}</div>
-      <button className="toggle" aria-pressed={it.unlimited} onClick={() => onChange({ unlimited: !it.unlimited, amount: it.unlimited ? Number(val) || 700 : it.amount })}>
+      <button className="toggle" aria-pressed={it.unlimited} onClick={() => onChange({ unlimited: !it.unlimited, amount: it.unlimited ? Number(val) || defaultAmount(it.key, it.kind) : it.amount })}>
         {it.unlimited ? '∞ בלי הגבלה' : 'כמות'}
       </button>
       {!it.unlimited && (
         <>
-          <label htmlFor={id} className="muted" style={{ fontSize: 12 }}>מ״ל</label>
-          <input id={id} className="amount" type="number" inputMode="numeric" min="0" step="10" value={val}
+          <label htmlFor={id} className="muted" style={{ fontSize: 12 }}>{UNIT_HE[unit]}</label>
+          <input id={id} className="amount" type="number" inputMode="decimal" min="0" step={unit === 'pcs' ? 1 : unit === 'g' ? 50 : 10} value={val}
             onChange={(e) => setVal(e.target.value)} onBlur={() => onChange({ amount: Math.max(0, Number(val) || 0) })} />
         </>
       )}

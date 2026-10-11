@@ -82,3 +82,47 @@ test('recommendations learn from ratings', () => {
   const names = r.items.map((e) => e.drink.name);
   assert.ok(!names.includes('Gin Tonic') || names.indexOf('Screwdriver') < names.indexOf('Gin Tonic'));
 });
+
+import { toAmount } from './measure.js';
+import { sortEntries, alcoholOf, prepMinutesOf } from './match.js';
+import { migrateInventory } from './ingredients.js';
+
+test('units: eggs, citrus, sugar', () => {
+  assert.equal(toAmount('1', null, 'pcs', 30), 1);
+  assert.equal(toAmount('1 tblsp', 15, 'pcs', 30), 0.5);
+  assert.equal(toAmount('Juice of 1/2', null, 'pcs', 25), 0.5);
+  assert.equal(toAmount('1/2 oz', 15, 'pcs', 30), 0.5);
+  assert.equal(toAmount('1 wedge', null, 'pcs', 25), 0.125);
+  assert.equal(toAmount('2 tsp', 10, 'g', null), 8);
+  assert.equal(toAmount('1 cube', null, 'g', null), 4);
+  const d = raw('9', 'Whiskey Sour', [['Bourbon', '2 oz'], ['Lemon juice', '3/4 oz'], ['Sugar', '1 tsp'], ['Egg white', '1']]);
+  const egg = d.ingredients.find((i) => i.group === 'egg');
+  assert.equal(egg.unit, 'pcs'); assert.equal(egg.amount, 1);
+  const idx = buildIndex([d], [
+    { key: 'bourbon', unit: 'ml', amount: 700 }, { key: 'lemon', unit: 'pcs', amount: 2 },
+    { key: 'sugar', unit: 'g', unlimited: true }, { key: 'egg', unit: 'pcs', amount: 3 },
+  ]);
+  assert.equal(idx[0].ready, true);
+  assert.equal(idx[0].servings, 2); // 2 לימונים / 0.75 לכוס = 2
+});
+
+test('migration of old ml-based eggs', () => {
+  const m = migrateInventory([{ key: 'egg', kind: 'dairy', amount: 500, unlimited: false }]);
+  assert.equal(m[0].unit, 'pcs');
+  assert.equal(m[0].amount, 6);
+});
+
+test('alcohol, time, sorting', () => {
+  const mm = DRINKS[0];
+  assert.equal(alcoholOf(mm).pure, 24); // 60ml * 40%
+  assert.ok(prepMinutesOf({ ...mm, instructions: 'Shake with ice and strain.' }) > prepMinutesOf({ ...mm, instructions: 'Pour.' }));
+  const idx = buildIndex(DRINKS, INV);
+  const byAlc = sortEntries(idx, 'alcohol', 'desc', {}).map((e) => e.alcohol.pure);
+  assert.deepEqual(byAlc, [...byAlc].sort((a, b) => b - a));
+  const byRate = sortEntries(idx, 'rating', 'desc', { ratings: { 5: 2, 1: 5 } }).map((e) => e.drink.id);
+  assert.deepEqual(byRate.slice(0, 2), ['1', '5']);
+  const asc = sortEntries(idx, 'rating', 'asc', { ratings: { 5: 2, 1: 5 } }).map((e) => e.drink.id);
+  assert.deepEqual(asc.slice(0, 2), ['5', '1']);
+  const fav = sortEntries(idx, 'fav', 'desc', { favorites: ['7'] });
+  assert.equal(fav[0].drink.id, '7');
+});

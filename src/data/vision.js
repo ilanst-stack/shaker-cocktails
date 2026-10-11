@@ -1,0 +1,68 @@
+// זיהוי בקבוקים ומצרכים מתמונה בעזרת Gemini (Firebase AI Logic)
+import { getAI, getGenerativeModel, GoogleAIBackend, Schema } from 'firebase/ai';
+import { app } from '../firebase.js';
+import { geminiModel } from '../firebase-config.js';
+import { GROUPS, getGroup, unitOf } from './ingredients.js';
+
+let model = null;
+function getModel() {
+  if (model) return model;
+  const ai = getAI(app, { backend: new GoogleAIBackend() });
+  const keys = [...GROUPS.filter((g) => !g.assumed).map((g) => g.key), 'other'];
+  model = getGenerativeModel(ai, {
+    model: geminiModel,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: Schema.object({
+        properties: {
+          items: Schema.array({
+            items: Schema.object({
+              properties: {
+                label: Schema.string({ description: 'Product name as written on the label, e.g. "Bombay Sapphire London Dry Gin"' }),
+                key: Schema.enumString({ enum: keys, description: 'Best matching ingredient category' }),
+                bottleMl: Schema.number({ description: 'Full container size in ml (typical: 50, 200, 330, 500, 700, 750, 1000, 1500). 0 for fruit/eggs.' }),
+                fillPercent: Schema.number({ description: 'Estimated remaining liquid, 0-100, judged from the visible liquid level. 100 if sealed/unclear.' }),
+                count: Schema.number({ description: 'Number of units for countable items (eggs, lemons, limes, oranges). Otherwise 1 (number of identical bottles).' }),
+                confidence: Schema.number({ description: 'Confidence 0-1 that the identification is correct' }),
+              },
+            }),
+          }),
+        },
+      }),
+    },
+  });
+  return model;
+}
+
+const PROMPT = `You are helping fill a home-bar inventory for a cocktail app.
+Look at the photo and list EVERY drink-related product you can identify: spirits, liqueurs, wines, beers,
+mixers (soda, tonic, cola, ginger beer), juices, syrups, bitters, plus cocktail fruit (lemons, limes, oranges) and eggs.
+For each item give the label text, the best matching category key, container size, estimated fill level, count and confidence.
+Notes: Cointreau / Grand Marnier / Triple Sec → "triple sec". Kahlua → "coffee liqueur". Baileys → "irish cream".
+Martini Rosso → "sweet vermouth". Martini Extra Dry → "dry vermouth". Prosecco/Cava/Champagne → "sparkling wine".
+Arak/Ouzo → "arak". Spiced/gold/dark rum → "dark rum", white/silver rum → "white rum". Jägermeister → "herbal liqueur".
+Ignore items that are not drink ingredients. If two identical bottles appear, use count 2.`;
+
+// מחזיר רשימת הצעות להוספה למלאי
+export async function identifyBottles(dataUrl) {
+  const [meta, b64] = dataUrl.split(',');
+  const mimeType = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+  const res = await getModel().generateContent([PROMPT, { inlineData: { data: b64, mimeType } }]);
+  let parsed;
+  try { parsed = JSON.parse(res.response.text()); } catch { throw new Error('לא הצלחתי להבין את התשובה מהזיהוי'); }
+  const merged = new Map();
+  for (const it of parsed.items || []) {
+    const g = getGroup(it.key);
+    if (!g) continue;
+    const unit = unitOf(g.key);
+    const count = Math.max(1, Math.round(it.count || 1));
+    let amount;
+    if (unit === 'pcs') amount = count;
+    else if (unit === 'g') amount = 1000;
+    else amount = Math.round(((it.bottleMl || 700) * Math.min(100, Math.max(0, it.fillPercent ?? 100)) / 100) * count / 10) * 10;
+    const prev = merged.get(g.key);
+    if (prev) { prev.amount += amount; prev.labels.push(it.label); prev.confidence = Math.min(prev.confidence, it.confidence ?? 0.5); }
+    else merged.set(g.key, { key: g.key, he: g.he, unit, amount, labels: [it.label], confidence: it.confidence ?? 0.5 });
+  }
+  return [...merged.values()].sort((a, b) => b.confidence - a.confidence);
+}

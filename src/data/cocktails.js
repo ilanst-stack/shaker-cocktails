@@ -1,9 +1,9 @@
 // טעינת כל המאגר מ-TheCocktailDB (חיפוש לפי אות ראשונה a–z, 0–9), שמירה במטמון לשבוע
-import { groupOf, norm } from './ingredients.js';
-import { toMl } from './measure.js';
+import { groupOf, norm, unitOf, pcsMlOf } from './ingredients.js';
+import { toMl, toAmount } from './measure.js';
 
 const API = '/api/cocktaildb';
-const CACHE_KEY = 'shaker.drinks.v1';
+const CACHE_KEY = 'shaker.drinks.v2';
 const CACHE_DAYS = 7;
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('');
 
@@ -14,7 +14,10 @@ export function normalizeDrink(d) {
     if (!name || !name.trim()) continue;
     const measure = (d[`strMeasure${i}`] || '').trim();
     const g = groupOf(name);
-    ingredients.push({ name: name.trim(), measure, ml: toMl(measure), group: g?.key || norm(name) });
+    const group = g?.key || norm(name);
+    const ml = toMl(measure);
+    const unit = unitOf(group);
+    ingredients.push({ name: name.trim(), measure, ml, group, unit, amount: toAmount(measure, ml, unit, pcsMlOf(group)) });
   }
   return {
     id: d.idDrink,

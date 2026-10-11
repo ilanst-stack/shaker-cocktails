@@ -15,7 +15,12 @@ export function missingText(e) {
   return [...new Set(names)].join(', ');
 }
 
-export default function DrinkCard({ e, fav, rating, onOpen, onFav }) {
+export function alcoholText(e) {
+  return e.alcohol.pure > 0 ? `${Math.round(e.alcohol.pure)} מ״ל אלכוהול` : 'ללא אלכוהול';
+}
+
+export default function DrinkCard({ e, fav, rating, onOpen, onFav, highlight }) {
+  const hl = (k) => `stat ${highlight === k ? 'hl' : ''}`;
   const miss = missingText(e);
   return (
     <article className="card">
@@ -27,9 +32,14 @@ export default function DrinkCard({ e, fav, rating, onOpen, onFav }) {
           {e.families.slice(0, 3).map((f) => <span key={f} className="tag">{FAM_HE[f]}</span>)}
           {rating != null && <span className="tag" style={{ background: '#111', color: '#FFE14D' }}>★ {rating}</span>}
         </div>
-        <div className="meta">
-          {e.ready ? servingsText(e) : `${e.drink.ingredients.length} מצרכים`}
-          {e.subs.length > 0 && ` · החלפה: ${heName(e.subs[0].ing.name)} ← ${e.subs[0].using.he}`}
+        <div className="meta" style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
+          <span className={hl('alcohol')}>{alcoholText(e)}</span>
+          <span className={hl('time')}>~{e.minutes} דק׳</span>
+          <span className={hl('count')}>{e.count} מצרכים</span>
+        </div>
+        <div className="meta" style={{ marginTop: 2, fontWeight: 500 }}>
+          {e.ready && servingsText(e)}
+          {e.subs.length > 0 && `${e.ready ? ' · ' : ''}החלפה: ${heName(e.subs[0].ing.name)} ← ${e.subs[0].using.he}`}
         </div>
       </div>
       <button className="ghost" aria-label={fav ? 'הסר מהמועדפים' : 'הוסף למועדפים'} aria-pressed={fav} onClick={onFav}>

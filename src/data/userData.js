@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { doc, onSnapshot, setDoc, getDoc, deleteDoc, serverTimestamp, deleteField } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { migrateInventory } from './ingredients.js';
 
 const EMPTY = { inventory: [], favorites: [], ratings: {}, tasted: {} };
 
@@ -14,7 +15,10 @@ export function useUserData(uid) {
   useEffect(() => {
     if (!uid) return undefined;
     const ref = doc(db, 'users', uid);
-    return onSnapshot(ref, (snap) => setData({ ...EMPTY, ...(snap.data() || {}) }), (e) => setError(e));
+    return onSnapshot(ref, (snap) => {
+      const d = { ...EMPTY, ...(snap.data() || {}) };
+      setData({ ...d, inventory: migrateInventory(d.inventory) });
+    }, (e) => setError(e));
   }, [uid]);
 
   const save = useCallback((patch) => setDoc(doc(db, 'users', uid), { ...patch, updatedAt: serverTimestamp() }, { merge: true }), [uid]);

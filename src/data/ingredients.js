@@ -106,6 +106,47 @@ export const GROUPS = [
   { key: 'water', he: 'מים', kind: 'mixer', color: '#EAF6FB', assumed: true, aliases: ['water', 'hot water', 'cold water', 'boiling water'] },
 ];
 
+// ---- יחידות מידה: רוב המצרכים במ״ל, פירות וביצים ביחידות, סוכר בגרמים
+// לפריטים ביחידות: כמה מ״ל מיץ/נוזל יש ביחידה אחת (להמרה כשהמתכון כותב "1/2 oz מיץ ליים")
+const PCS_ML = { egg: 30, lemon: 30, lime: 25, orange: 60, cherry: null, olive: null, strawberries: null, banana: null, berries: null, cucumber: null, mint: null, basil: null, celery: null, ginger: null };
+const GRAMS = new Set(['sugar', 'ice cream', 'salt', 'spices']);
+
+export function unitOf(key) {
+  if (key in PCS_ML) return 'pcs';
+  if (GRAMS.has(key)) return 'g';
+  return 'ml';
+}
+export const pcsMlOf = (key) => PCS_ML[key] ?? null;
+export const UNIT_HE = { ml: 'מ״ל', pcs: 'יח׳', g: 'גר׳' };
+
+// ---- אחוז אלכוהול (ABV) משוער לכל קבוצה
+const ABV = {
+  vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40,
+  'triple sec': 35, 'blue curacao': 25, 'coffee liqueur': 20, 'irish cream': 17, amaretto: 28, campari: 25, aperol: 11, 'sweet vermouth': 16, 'dry vermouth': 18,
+  'peach schnapps': 20, 'melon liqueur': 20, 'raspberry liqueur': 16, 'cacao liqueur': 25, 'mint liqueur': 25, 'herbal liqueur': 35, 'other liqueur': 25, angostura: 44,
+  'sparkling wine': 12, 'white wine': 12, 'red wine': 14, beer: 5, cider: 5,
+};
+export const abvOf = (key) => ABV[key] ?? 0;
+
+export function defaultAmount(key, kind) {
+  const u = unitOf(key);
+  if (u === 'pcs') return key === 'egg' ? 6 : ['lemon', 'lime', 'orange'].includes(key) ? 5 : 10;
+  if (u === 'g') return 1000;
+  if (kind === 'spirit' || kind === 'liqueur' || kind === 'wine') return 700;
+  if (kind === 'juice' || kind === 'mixer') return 1500;
+  return 500;
+}
+
+// מלאי שנשמר לפני שהיו יחידות: מוסיפים יחידה, ואם היא השתנתה — כמות ברירת מחדל
+export function migrateInventory(inv) {
+  return (inv || []).map((it) => {
+    const unit = unitOf(it.key);
+    if (it.unit === unit) return it;
+    const amount = it.unlimited ? null : unit === 'ml' ? it.amount : defaultAmount(it.key, it.kind);
+    return { ...it, unit, amount };
+  });
+}
+
 const byKey = new Map(GROUPS.map((g) => [g.key, g]));
 const byAlias = new Map();
 for (const g of GROUPS) {

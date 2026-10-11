@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import GlassArt, { glassType } from './GlassArt.jsx';
 import { heName, colorOf, getGroup } from '../data/ingredients.js';
-import { fmtMl } from '../data/measure.js';
-import { servingsText, missingText } from './DrinkCard.jsx';
+import { fmtIngredient } from '../data/measure.js';
+import { servingsText, missingText, alcoholText } from './DrinkCard.jsx';
 import { Star, IconBack, IconCamera, IconTrash } from './Icons.jsx';
 import { loadPhoto, savePhoto, removePhoto, compressImage } from '../data/userData.js';
 
@@ -64,7 +64,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             <div className="callouts">
               {callouts.map((i, k) => (
                 <div key={k} className="callout" style={{ background: missingSet.has(i.name) ? '#FFD1CF' : k % 3 === 1 ? colorOf(i.name) : '#fff' }}>
-                  <b>{i.ml ? fmtMl(i.ml) : (i.measure || 'לפי הטעם')}</b>
+                  <b>{fmtIngredient(i)}</b>
                   <span>{heName(i.name)}{missingSet.has(i.name) ? ' (חסר!)' : ''}</span>
                 </div>
               ))}
@@ -80,7 +80,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
               <ul style={{ margin: '6px 0 0', paddingInlineStart: 18, lineHeight: 1.7 }}>
                 {shown.map((i, k) => (
                   <li key={k} style={{ fontWeight: missingSet.has(i.name) ? 700 : 400, color: missingSet.has(i.name) ? '#B00020' : 'inherit' }}>
-                    {heName(i.name)} — {i.ml ? fmtMl(i.ml) : i.measure || 'לפי הטעם'} <small className="muted" dir="ltr">({i.measure} {i.name})</small>
+                    {heName(i.name)} — {fmtIngredient(i)} <small className="muted" dir="ltr">({i.measure} {i.name})</small>
                   </li>
                 ))}
               </ul>
@@ -102,7 +102,9 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
           <div className="serve">
             <span>כוס: {GLASS_HE[gType]}</span>
             {hasIce && <span>עם קרח</span>}
-            <span>{d.alcoholic === 'Non alcoholic' ? 'ללא אלכוהול' : 'אלכוהולי'}</span>
+            <span>{alcoholText(e)}{e.alcohol.pure > 0 ? ` (~${e.alcohol.abv}%)` : ''}</span>
+            <span>הכנה: ~{e.minutes} דק׳</span>
+            <span>{e.count} מצרכים</span>
           </div>
 
           <h2 className="h2">הקוקטייל שלי</h2>
