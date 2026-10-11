@@ -78,11 +78,13 @@ function Main({ user }) {
   const close = () => { if (history.state?.drink) history.back(); else setOpenId(null); };
 
   // גיל: נשמר בחשבון. משתמש קיים בלי בחירה — לוקחים מהבחירה במסך הכניסה, אחרת שואלים
-  const adult = data?.adult ?? (data ? getPendingAge() : null);
+  const adult = data ? (getPendingAge() ?? data.adult) : null;
   useEffect(() => {
-    if (data && data.adult === undefined) { const p = getPendingAge(); if (p != null) setAdult(p); }
-    if (data && data.adult !== undefined) clearPendingAge(); // בחירה במכשיר משותף לא עוברת לחשבון הבא
-  }, [data?.adult]); // eslint-disable-line react-hooks/exhaustive-deps
+    // הבחירה במסך הכניסה קובעת לכל הכניסה הזו (גם אם בחשבון נשמרה בחירה אחרת)
+    if (!data) return;
+    const p = getPendingAge();
+    if (p != null) { if (data.adult !== p) setAdult(p); clearPendingAge(); }
+  }, [!!data]); // eslint-disable-line react-hooks/exhaustive-deps
   const kids = adult === false;
   const visibleInv = useMemo(() => (data ? (kids ? data.inventory.filter((i) => !isAlcoholKey(i.key)) : data.inventory) : []), [data?.inventory, kids]);
   const setVisibleInv = (vis) => setInventory(kids ? [...data.inventory.filter((i) => isAlcoholKey(i.key)), ...vis] : vis);
