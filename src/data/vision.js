@@ -33,6 +33,8 @@ For each item give the label text, the best matching category key, container siz
 Notes: Cointreau / Grand Marnier / Triple Sec → "triple sec". Kahlua → "coffee liqueur". Baileys → "irish cream".
 Martini Rosso → "sweet vermouth". Martini Extra Dry → "dry vermouth". Prosecco/Cava/Champagne → "sparkling wine".
 Arak/Ouzo → "arak". Spiced/gold/dark rum → "dark rum", white/silver rum → "white rum". Jägermeister → "herbal liqueur".
+Syrups (Monin, Vedrenne, Teisseire...) are NOT juices: passion fruit syrup → "passion fruit syrup", orgeat/raspberry/elderflower syrup → "flavored syrup", sugar syrup → "sugar", grenadine → "grenadine".
+Bottled lemon/lime juice → "lemon juice"/"lime juice"; whole fruit → "lemon"/"lime"/"orange" with count.
 Ignore items that are not drink ingredients. If two identical bottles appear, use count 2.`;
 
 // מחזיר רשימת הצעות להוספה למלאי

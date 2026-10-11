@@ -16,6 +16,11 @@ export function missingText(e) {
   return [...new Set(names)].join(', ');
 }
 
+export function subText(e) {
+  const s = e.subs.find((x) => !x.squeeze);
+  return s ? `החלפה: ${heName(s.ing.name)} ← ${s.using.he}` : '';
+}
+
 export function alcoholText(e) {
   return e.alcohol.pure > 0 ? `${Math.round(e.alcohol.pure)} מ״ל אלכוהול` : 'ללא אלכוהול';
 }
@@ -43,7 +48,7 @@ export default function DrinkCard({ e, fav, rating, onOpen, onFav, highlight, sh
         </div>
         <div className="meta" style={{ marginTop: 2, fontWeight: 500 }}>
           {e.ready && servingsText(e)}
-          {e.subs.length > 0 && `${e.ready ? ' · ' : ''}החלפה: ${heName(e.subs[0].ing.name)} ← ${e.subs[0].using.he}`}
+          {subText(e) && `${e.ready ? ' · ' : ''}${subText(e)}`}
         </div>
       </div>
       <button className="ghost" aria-label={fav ? 'הסר מהמועדפים' : 'הוסף למועדפים'} aria-pressed={fav} onClick={onFav}>

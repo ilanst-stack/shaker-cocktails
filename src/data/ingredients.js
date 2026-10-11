@@ -45,8 +45,10 @@ export const GROUPS = [
   { key: 'cider', he: 'סיידר', kind: 'wine', color: '#F2C14E', aliases: ['cider', 'apple cider', 'hard cider'] },
 
   // ---- מיצים ופירות
-  { key: 'lemon', he: 'לימון / מיץ לימון', kind: 'fresh', color: '#FFF27A', unlimited: true, aliases: ['lemon', 'lemon juice', 'fresh lemon juice', 'lemon peel', 'lemon slice', 'juice of lemon', 'lemon wedge'] },
-  { key: 'lime', he: 'ליים / מיץ ליים', kind: 'fresh', color: '#B6E35C', unlimited: true, aliases: ['lime', 'lime juice', 'fresh lime juice', 'lime peel', 'lime wedge', 'lime slice', 'juice of lime', 'limes', 'rose\'s lime juice', 'lime cordial'] },
+  { key: 'lemon', he: 'לימון (פרי)', kind: 'fresh', color: '#FFF27A', unlimited: true, aliases: ['lemon', 'lemons', 'lemon peel', 'lemon slice', 'juice of lemon', 'lemon wedge', 'lemon twist', 'lemon zest'] },
+  { key: 'lemon juice', he: 'מיץ לימון', kind: 'juice', color: '#FFF27A', aliases: ['lemon juice', 'fresh lemon juice', 'bottled lemon juice'] },
+  { key: 'lime', he: 'ליים (פרי)', kind: 'fresh', color: '#B6E35C', unlimited: true, aliases: ['lime', 'limes', 'lime peel', 'lime wedge', 'lime slice', 'juice of lime', 'lime twist', 'lime zest'] },
+  { key: 'lime juice', he: 'מיץ ליים', kind: 'juice', color: '#B6E35C', aliases: ['lime juice', 'fresh lime juice', 'rose\'s lime juice', 'lime cordial'] },
   { key: 'orange juice', he: 'מיץ תפוזים', kind: 'juice', color: '#FF9F1C', aliases: ['orange juice', 'fresh orange juice'] },
   { key: 'orange', he: 'תפוז (פרי/קליפה)', kind: 'fresh', color: '#FF9F1C', aliases: ['orange', 'orange peel', 'orange spiral', 'orange slice', 'orange wedge', 'blood orange', 'orange zest'] },
   { key: 'pineapple juice', he: 'מיץ אננס', kind: 'juice', color: '#FFD84D', aliases: ['pineapple juice', 'pineapple', 'pineapple chunks'] },
@@ -54,7 +56,9 @@ export const GROUPS = [
   { key: 'grapefruit juice', he: 'מיץ אשכוליות', kind: 'juice', color: '#FF7F7F', aliases: ['grapefruit juice', 'pink grapefruit juice', 'grapefruit'] },
   { key: 'apple juice', he: 'מיץ תפוחים', kind: 'juice', color: '#F2C14E', aliases: ['apple juice', 'apple'] },
   { key: 'tomato juice', he: 'מיץ עגבניות', kind: 'juice', color: '#C1272D', aliases: ['tomato juice', 'clamato juice'] },
-  { key: 'passion fruit', he: 'פסיפלורה', kind: 'juice', color: '#F7B32B', aliases: ['passion fruit juice', 'passion fruit', 'passion fruit syrup', 'maracuja juice'] },
+  { key: 'passion fruit', he: 'מיץ / פרי פסיפלורה', kind: 'juice', color: '#F7B32B', aliases: ['passion fruit juice', 'passion fruit', 'maracuja juice', 'passion fruit nectar'] },
+  { key: 'passion fruit syrup', he: 'סירופ פסיפלורה', kind: 'sweet', color: '#F2A93B', aliases: ['passion fruit syrup', 'maracuja syrup'] },
+  { key: 'flavored syrup', he: 'סירופ בטעמים (אורז׳ה, פטל וכו׳)', kind: 'sweet', color: '#E8A0BF', aliases: ['orgeat syrup', 'orgeat', 'falernum', 'raspberry syrup', 'strawberry syrup', 'almond syrup', 'cinnamon syrup', 'elderflower cordial', 'elderflower syrup', 'peach syrup', 'blackberry syrup'] },
   { key: 'mango', he: 'מנגו', kind: 'juice', color: '#FFB627', aliases: ['mango', 'mango juice', 'mango nectar'] },
   { key: 'strawberries', he: 'תותים', kind: 'fresh', color: '#E63946', aliases: ['strawberries', 'strawberry', 'frozen strawberries', 'strawberry schnapps'] },
   { key: 'banana', he: 'בננה', kind: 'fresh', color: '#FBE37D', aliases: ['banana'] },

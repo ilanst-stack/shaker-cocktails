@@ -105,7 +105,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
                 ))}
               </ul>
               {!e.ready && <p style={{ margin: '6px 0 0', fontWeight: 700 }}>חסר: {missingText(e)}</p>}
-              {e.subs.map((s, k) => <p key={k} style={{ margin: '4px 0 0', fontSize: 14 }}>במקום {heName(s.ing.name)} אפשר להשתמש ב{s.using.he}</p>)}
+              {e.subs.map((s, k) => <p key={k} style={{ margin: '4px 0 0', fontSize: 14 }}>{s.squeeze ? `${heName(s.ing.name)}: סוחטים מ${s.using.he.replace(' (פרי)', '')} טרי` : `במקום ${heName(s.ing.name)} אפשר להשתמש ב${s.using.he}`}</p>)}
             </div>
           )}
 

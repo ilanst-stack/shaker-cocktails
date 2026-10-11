@@ -3,7 +3,7 @@ import { groupOf, norm, unitOf, pcsMlOf } from './ingredients.js';
 import { toMl, toAmount } from './measure.js';
 
 const API = '/api/cocktaildb';
-const CACHE_KEY = 'shaker.drinks.v2';
+const CACHE_KEY = 'shaker.drinks.v3';
 const CACHE_DAYS = 7;
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('');
 

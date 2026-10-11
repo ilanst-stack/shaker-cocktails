@@ -1,5 +1,5 @@
 // התאמת קוקטיילים למלאי, חישוב "מספיק ל-X כוסות", וסיווג לקטגוריות
-import { getGroup, unitOf, abvOf } from './ingredients.js';
+import { getGroup, unitOf, abvOf, pcsMlOf } from './ingredients.js';
 
 // מצרכים שאפשר להחליף זה בזה (יוצג "במקום X אפשר Y")
 const SUBS = {
@@ -7,8 +7,14 @@ const SUBS = {
   'dark rum': ['white rum'],
   bourbon: ['whiskey'],
   whiskey: ['bourbon'],
+  // מיץ הדרים: מבקבוק, או סחיטה מפרי טרי (מומר ליחידות)
+  'lemon juice': ['lemon', 'lime juice', 'lime'],
+  'lime juice': ['lime', 'lemon juice', 'lemon'],
+  'orange juice': ['orange'],
   lemon: ['lime'],
   lime: ['lemon'],
+  'passion fruit': ['passion fruit syrup'],
+  'passion fruit syrup': ['passion fruit'],
   'ginger ale': ['ginger beer', 'lemon-lime soda'],
   'ginger beer': ['ginger ale'],
   'soda water': ['lemon-lime soda', 'tonic water'],
@@ -18,6 +24,8 @@ const SUBS = {
   cream: ['milk'],
   'sparkling wine': ['white wine'],
 };
+
+const SQUEEZE = { 'lemon juice': 'lemon', 'lime juice': 'lime', 'orange juice': 'orange' };
 
 export function inventoryMap(inventory) {
   const m = new Map();
@@ -36,14 +44,17 @@ export function matchDrink(drink, inv) {
     let have = inv.get(ing.group);
     if (!have) {
       const alt = (SUBS[ing.group] || []).find((k) => inv.has(k));
-      if (alt) { have = inv.get(alt); subs.push({ ing, using: have }); }
+      if (alt) { have = inv.get(alt); subs.push({ ing, using: have, squeeze: SQUEEZE[ing.group] === alt }); }
     }
     if (!have) {
       (g?.optional ? optionalMissing : missing).push(ing);
       continue;
     }
     // הכמות ביחידה של המצרך במלאי (מ״ל / יח׳ / גר׳). בהחלפה ליחידה אחרת — לא מחשבים
-    const amt = (have.unit || unitOf(have.key)) === ing.unit ? ing.amount : null;
+    const haveUnit = have.unit || unitOf(have.key);
+    let amt = haveUnit === ing.unit ? ing.amount : null;
+    // מיץ שנסחט מפרי טרי: מ״ל במתכון → מספר פירות במלאי
+    if (haveUnit === 'pcs' && ing.unit === 'ml' && ing.ml && pcsMlOf(have.key)) amt = Math.round((ing.ml / pcsMlOf(have.key)) * 100) / 100;
     if (!have.unlimited && amt) need.set(have.key, (need.get(have.key) || 0) + amt);
   }
   let servings = null; // null = בלי הגבלה
@@ -89,7 +100,7 @@ export function baseOf(drink) {
 
 export const FAMILIES = [
   { id: 'creamy', he: 'קרמי', groups: ['cream', 'milk', 'irish cream', 'coconut', 'ice cream', 'egg'] },
-  { id: 'citrus', he: 'הדרים', groups: ['lemon', 'lime', 'orange juice', 'grapefruit juice', 'lemonade'] },
+  { id: 'citrus', he: 'הדרים', groups: ['lemon', 'lime', 'lemon juice', 'lime juice', 'orange juice', 'grapefruit juice', 'lemonade'] },
   { id: 'fizzy', he: 'מוגז', groups: ['soda water', 'tonic water', 'cola', 'ginger ale', 'ginger beer', 'lemon-lime soda', 'sparkling wine', 'beer', 'energy drink'] },
   { id: 'fruity', he: 'פירותי', groups: ['pineapple juice', 'cranberry juice', 'passion fruit', 'mango', 'strawberries', 'banana', 'berries', 'apple juice', 'melon liqueur', 'peach schnapps', 'raspberry liqueur'] },
   { id: 'coffee', he: 'קפה ושוקולד', groups: ['coffee', 'coffee liqueur', 'cacao liqueur', 'chocolate syrup'] },

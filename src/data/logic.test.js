@@ -42,7 +42,7 @@ test('ingredient groups', () => {
 
 const INV = [
   { key: 'vodka', he: 'וודקה', unlimited: false, amount: 250 },
-  { key: 'lime', he: 'ליים', unlimited: true },
+  { key: 'lime', he: 'ליים', unit: 'pcs', unlimited: true },
   { key: 'ginger beer', he: 'ג׳ינג׳ר ביר', unlimited: false, amount: 1000 },
   { key: 'orange juice', he: 'מיץ תפוזים', unlimited: false, amount: 1000 },
   { key: 'dark rum', he: 'רום כהה', unlimited: false, amount: 700 },
@@ -125,4 +125,14 @@ test('alcohol, time, sorting', () => {
   assert.deepEqual(asc.slice(0, 2), ['5', '1']);
   const fav = sortEntries(idx, 'fav', 'desc', { favorites: ['7'] });
   assert.equal(fav[0].drink.id, '7');
+});
+
+test('lemon juice from fresh lemons, syrup is not juice', () => {
+  const d = raw('20', 'Sour', [['Vodka', '2 oz'], ['Lemon juice', '1 oz']]);
+  assert.equal(d.ingredients[1].group, 'lemon juice');
+  const [e] = buildIndex([d], [{ key: 'vodka', unit: 'ml', amount: 700 }, { key: 'lemon', unit: 'pcs', amount: 3 }]);
+  assert.equal(e.ready, true);
+  assert.equal(e.servings, 3); // 30 מ"ל = לימון אחד לכוס
+  assert.equal(e.subs[0].squeeze, true);
+  assert.equal(groupOf('Passion fruit syrup').key, 'passion fruit syrup');
 });

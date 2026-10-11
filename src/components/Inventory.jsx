@@ -4,15 +4,19 @@ import { IconTrash, IconPlus, IconSearch } from './Icons.jsx';
 import ScanShelf from './ScanShelf.jsx';
 import ScrollRow from './ScrollRow.jsx';
 
-const QUICK = ['vodka', 'gin', 'white rum', 'tequila', 'whiskey', 'triple sec', 'lime', 'lemon', 'sugar', 'soda water', 'cola', 'tonic water', 'orange juice', 'mint', 'ginger beer', 'cream'];
+const QUICK = ['vodka', 'gin', 'white rum', 'tequila', 'whiskey', 'triple sec', 'lime', 'lemon', 'lemon juice', 'lime juice', 'sugar', 'soda water', 'cola', 'tonic water', 'orange juice', 'mint', 'ginger beer', 'cream'];
 const KIND_ORDER = ['spirit', 'liqueur', 'wine', 'juice', 'mixer', 'fresh', 'sweet', 'dairy', 'garnish'];
 const KIND_HE = { spirit: 'אלכוהול', liqueur: 'ליקרים', wine: 'יין ובירה', juice: 'מיצים', mixer: 'מוגזים ומשקאות', fresh: 'פירות ועשבים', sweet: 'ממתיקים', dairy: 'חלב וביצים', garnish: 'תבלינים וקישוטים', other: 'אחר' };
 
-export function newItem(nameOrKey, amount) {
+// "ליקר צמחים (יגרמייסטר/שרטרז)" → שם ראשי + שורת משנה קטנה, כדי שלא ייחתך
+const nameMain = (he) => he.replace(/\s*\(.*\)\s*$/, '');
+const nameSub = (he) => (he.match(/\((.*)\)\s*$/) || [])[1] || '';
+
+export function newItem(nameOrKey, amount, label) {
   const g = getGroup(nameOrKey) || groupOf(nameOrKey);
   if (g) {
     const unlimited = amount == null && !!g.unlimited;
-    return { key: g.key, he: g.he, kind: g.kind, unit: unitOf(g.key), unlimited, amount: unlimited ? null : amount ?? defaultAmount(g.key, g.kind) };
+    return { key: g.key, he: g.he, kind: g.kind, unit: unitOf(g.key), unlimited, amount: unlimited ? null : amount ?? defaultAmount(g.key, g.kind), ...(label ? { label } : {}) };
   }
   return { key: norm(nameOrKey), he: nameOrKey, kind: 'other', unit: 'ml', unlimited: false, amount: amount ?? 500 };
 }
@@ -110,7 +114,12 @@ function InvRow({ it, onChange, onRemove }) {
   return (
     <div className="inv-item">
       <span className="dot" style={{ background: g?.color || '#F2B705' }} />
-      <div className="n">{it.he}{it.he !== it.key && !g && <small dir="ltr">{it.key}</small>}</div>
+      <div className="n">
+        {nameMain(it.he)}
+        {nameSub(it.he) && <small>{nameSub(it.he)}</small>}
+        {it.label && <small dir="ltr" style={{ textAlign: 'right' }}>{it.label}</small>}
+        {it.he !== it.key && !g && <small dir="ltr">{it.key}</small>}
+      </div>
       <button className="toggle" aria-pressed={it.unlimited} onClick={() => onChange({ unlimited: !it.unlimited, amount: it.unlimited ? Number(val) || defaultAmount(it.key, it.kind) : it.amount })}>
         {it.unlimited ? '∞ בלי הגבלה' : 'כמות'}
       </button>

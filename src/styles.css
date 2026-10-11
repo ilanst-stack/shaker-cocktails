@@ -39,7 +39,7 @@ button { cursor: pointer; }
 .bubble b { font: 700 28px/1 var(--display); display: block; }
 
 /* כפתורים */
-.btn { min-height: 48px; border: 3px solid var(--ink); box-shadow: var(--shadow); background: #fff; font: 700 24px var(--display); padding: 4px 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .08s, box-shadow .08s; }
+.btn { min-height: 48px; border: 3px solid var(--ink); box-shadow: var(--shadow); background: #fff; color: var(--ink); font: 700 24px var(--display); padding: 4px 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .08s, box-shadow .08s; }
 .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
 .btn.red { background: var(--red); color: #fff; }
 .btn.black { background: var(--ink); color: var(--yellow); }
@@ -103,8 +103,9 @@ button { cursor: pointer; }
 .inv-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .inv-item { display: flex; align-items: center; gap: 8px; background: #fff; border: 3px solid var(--ink); padding: 6px 8px 6px 6px; box-shadow: 3px 3px 0 var(--ink); }
 .inv-item .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink); flex-shrink: 0; }
-.inv-item .n { flex: 1; min-width: 0; font-weight: 700; }
-.inv-item .n small { display: block; font-weight: 400; font-size: 12px; opacity: .7; }
+.inv-item .n { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; line-height: 1.2; }
+.inv-item .n small { display: block; font-weight: 400; font-size: 12px; opacity: .75; }
+.inv-item .toggle, .inv-item .amount, .inv-item .ghost { flex-shrink: 0; }
 .amount { width: 84px; min-height: 40px; border: 2.5px solid var(--ink); padding: 4px 6px; font-size: 16px; text-align: center; }
 .toggle { min-height: 40px; border: 2.5px solid var(--ink); background: #fff; font: 700 13px var(--body); padding: 0 8px; }
 .toggle[aria-pressed='true'] { background: var(--lime); }

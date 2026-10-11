@@ -44,8 +44,9 @@ export default function ScanShelf({ inventory, setInventory }) {
     for (const r of rows.filter((x) => x.on)) {
       const amount = Math.max(0, Number(r.amount) || 0);
       const idx = inv.findIndex((i) => i.key === r.key);
-      if (idx >= 0) inv[idx] = { ...inv[idx], unlimited: false, unit: unitOf(r.key), amount };
-      else inv.push(newItem(r.key, amount));
+      const label = r.labels.filter(Boolean).join(' + ');
+      if (idx >= 0) inv[idx] = { ...inv[idx], unlimited: false, unit: unitOf(r.key), amount, ...(label ? { label } : {}) };
+      else inv.push(newItem(r.key, amount, label));
     }
     setInventory(inv);
     setState('idle'); setRows([]); setImg(null);
