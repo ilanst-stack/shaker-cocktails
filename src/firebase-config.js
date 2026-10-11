@@ -10,5 +10,5 @@ export const firebaseConfig = {
 
 // זיהוי בקבוקים ותרגום (Gemini דרך Firebase AI Logic) — דורש App Check עם Fraud Defense (reCAPTCHA Enterprise)
 // ↓↓↓ כאן מדביקים את ה-Key ID מ-Google Cloud → Fraud Defense ↓↓↓
-export const recaptchaEnterpriseKey = '';
+export const recaptchaEnterpriseKey = '6Ldc9uktAAAAAI6b0aisEeAEDji68ks5_CVY2MQ3';
 export const geminiModel = 'gemini-3.8-flash';
