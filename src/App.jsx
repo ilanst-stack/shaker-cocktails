@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { resetSticky } from './data/sticky.js';
 import { isConfigured, watchUser, logout } from './firebase.js';
 import { useUserData } from './data/userData.js';
 import { VERSION } from './version.js';
@@ -117,7 +118,7 @@ function Main({ user }) {
           {kids && <span className="version" style={{ background: '#9BD34C' }}>מוקטיילים</span>}
         </div>
         <button className="icon-btn" style={{ background: '#1FA3D9', color: '#fff', font: '700 24px var(--display)' }}
-          aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => { if (confirm('להתנתק?')) logout(); }}>
+          aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => { if (confirm('להתנתק?')) { resetSticky(); logout(); } }}>
           {user.photoURL ? <img src={user.photoURL} alt="" width="38" height="38" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" /> : (user.displayName || '?')[0]}
         </button>
       </header>

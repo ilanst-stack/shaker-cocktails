@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { loginWithGoogle } from '../firebase.js';
+import { resetSticky } from '../data/sticky.js';
 import Logo from './Logo.jsx';
 import AgeChoice from './AgeChoice.jsx';
 import { setPendingAge, getPendingAge } from '../data/age.js';
@@ -17,7 +18,7 @@ export default function Login() {
       </div>
       <AgeChoice value={adult} onChange={(v) => { setAdult(v); setPendingAge(v); }} />
       <button className="btn red" style={{ fontSize: 28, minWidth: 260 }} disabled={busy || adult == null}
-        onClick={async () => { setBusy(true); setErr(''); try { await loginWithGoogle(); } catch (e) { setErr(e.message || 'הכניסה נכשלה'); } finally { setBusy(false); } }}>
+        onClick={async () => { setBusy(true); setErr(''); try { resetSticky(); await loginWithGoogle(); } catch (e) { setErr(e.message || 'הכניסה נכשלה'); } finally { setBusy(false); } }}>
         {busy ? 'מתחבר…' : adult == null ? 'בחר/י גיל כדי להמשיך' : 'כניסה עם Google'}
       </button>
       {err && <p role="alert" style={{ fontWeight: 700, color: '#8B0000', maxWidth: 320 }}>{err}</p>}

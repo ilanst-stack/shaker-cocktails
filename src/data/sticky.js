@@ -9,13 +9,15 @@ const IDLE_MS = 60 * 60 * 1000; // שעה
 const now = () => Date.now();
 const touch = () => { try { localStorage.setItem(LAST, String(now())); } catch { /* ignore */ } };
 
+// מחיקת כל המיונים והבחירות — חזרה לברירת המחדל
+export function resetSticky() {
+  try { Object.keys(localStorage).filter((k) => k.startsWith(PREFIX)).forEach((k) => localStorage.removeItem(k)); } catch { /* ignore */ }
+}
+
 function resetIfIdle() {
   try {
     const last = Number(localStorage.getItem(LAST) || 0);
-    if (last && now() - last > IDLE_MS) {
-      Object.keys(localStorage).filter((k) => k.startsWith(PREFIX)).forEach((k) => localStorage.removeItem(k));
-      return true;
-    }
+    if (last && now() - last > IDLE_MS) { resetSticky(); return true; }
   } catch { /* ignore */ }
   return false;
 }
