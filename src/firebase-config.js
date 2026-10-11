@@ -1,10 +1,9 @@
-// ↓↓↓ כאן מדביקים את פרטי הפרויקט מ-Firebase (Project settings → Your apps → Config) ↓↓↓
-// הפרטים האלה אינם סודיים — האבטחה נעשית דרך חוקי Firestore.
+// פרטי הפרויקט ב-Firebase (אינם סודיים — האבטחה נעשית דרך חוקי Firestore)
 export const firebaseConfig = {
-  apiKey: 'PASTE_HERE',
-  authDomain: 'PASTE_HERE',
-  projectId: 'PASTE_HERE',
-  storageBucket: 'PASTE_HERE',
-  messagingSenderId: 'PASTE_HERE',
-  appId: 'PASTE_HERE',
+  apiKey: 'AIzaSyB1a2tPnxfasXznnm_zwBUkdQVWOZPaIE0',
+  authDomain: 'shaker-cocktails.firebaseapp.com',
+  projectId: 'shaker-cocktails',
+  storageBucket: 'shaker-cocktails.firebasestorage.app',
+  messagingSenderId: '391900418580',
+  appId: '1:391900418580:web:fba87be12ada403a2b8d01',
 };
