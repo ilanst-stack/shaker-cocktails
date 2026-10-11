@@ -31,6 +31,7 @@ export function useUserData(uid) {
       return save({ favorites: [...fav] });
     },
     setTasted: (id, on) => save({ tasted: { [id]: on ? Date.now() : deleteField() }, ...(on ? {} : { ratings: { [id]: deleteField() } }) }),
+    setAdult: (adult) => save({ adult }),
     setRating: (id, r) => save({ ratings: { [id]: r }, tasted: { [id]: data?.tasted?.[id] || Date.now() } }),
   };
 

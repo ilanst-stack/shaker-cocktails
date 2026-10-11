@@ -3,6 +3,7 @@ import { GROUPS, groupOf, norm, getGroup, unitOf, defaultAmount, UNIT_HE } from 
 import { IconTrash, IconPlus, IconSearch } from './Icons.jsx';
 import ScanShelf from './ScanShelf.jsx';
 import ScrollRow from './ScrollRow.jsx';
+import { isAlcoholKey } from '../data/age.js';
 
 const QUICK = ['vodka', 'gin', 'white rum', 'tequila', 'whiskey', 'triple sec', 'lime', 'lemon', 'lemon juice', 'lime juice', 'sugar', 'soda water', 'cola', 'tonic water', 'orange juice', 'mint', 'ginger beer', 'cream'];
 const KIND_ORDER = ['spirit', 'liqueur', 'wine', 'juice', 'mixer', 'fresh', 'sweet', 'dairy', 'garnish'];
@@ -21,7 +22,7 @@ export function newItem(nameOrKey, amount, label) {
   return { key: norm(nameOrKey), he: nameOrKey, kind: 'other', unit: 'ml', unlimited: false, amount: amount ?? 500 };
 }
 
-export default function Inventory({ inventory, setInventory, ingredientNames }) {
+export default function Inventory({ inventory, setInventory, ingredientNames, kids }) {
   const [q, setQ] = useState('');
   const have = useMemo(() => new Set(inventory.map((i) => i.key)), [inventory]);
 
@@ -31,7 +32,7 @@ export default function Inventory({ inventory, setInventory, ingredientNames }) 
     const out = [];
     const seen = new Set();
     for (const g of GROUPS) {
-      if (g.assumed || have.has(g.key)) continue;
+      if (g.assumed || have.has(g.key) || (kids && isAlcoholKey(g.key))) continue;
       if (g.he.includes(q.trim()) || g.key.includes(t) || g.aliases.some((a) => a.includes(t))) { out.push({ key: g.key, label: g.he, sub: g.aliases[0] }); seen.add(g.key); }
     }
     for (const n of ingredientNames) {
@@ -78,14 +79,14 @@ export default function Inventory({ inventory, setInventory, ingredientNames }) 
         </div>
         <div style={{ fontSize: 13, fontWeight: 700, margin: '12px 0 4px' }}>הוספה מהירה</div>
         <ScrollRow label="הוספה מהירה" inset={false}>
-          {QUICK.filter((k) => !have.has(k)).map((k) => (
+          {QUICK.filter((k) => !have.has(k) && !(kids && isAlcoholKey(k))).map((k) => (
             <button key={k} className="chip sm" onClick={() => add(k)}><IconPlus /> {getGroup(k).he}</button>
           ))}
         </ScrollRow>
         <p style={{ fontSize: 12, margin: '6px 0 0' }} className="muted">מים וקרח נחשבים תמיד קיימים.</p>
       </div>
 
-      <ScanShelf inventory={inventory} setInventory={setInventory} />
+      <ScanShelf inventory={inventory} setInventory={setInventory} kids={kids} />
 
       {inventory.length === 0 && (
         <div className="bubble" style={{ marginTop: 22 }}><b>הבר ריק! תתחיל להוסיף בקבוקים.</b></div>

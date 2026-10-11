@@ -3,6 +3,8 @@ import { isConfigured, watchUser, logout } from './firebase.js';
 import { useUserData } from './data/userData.js';
 import { VERSION } from './version.js';
 import Logo from './components/Logo.jsx';
+import AgeChoice from './components/AgeChoice.jsx';
+import { getPendingAge, clearPendingAge, isAlcoholFree, isAlcoholKey, isAlcoholName } from './data/age.js';
 import { loadDrinks, allIngredientNames } from './data/cocktails.js';
 import { buildIndex } from './data/match.js';
 import Login from './components/Login.jsx';
@@ -50,7 +52,7 @@ const TABS = [
 ];
 
 function Main({ user }) {
-  const { data, error, setInventory, toggleFavorite, setRating, setTasted } = useUserData(user.uid);
+  const { data, error, setInventory, toggleFavorite, setRating, setTasted, setAdult } = useUserData(user.uid);
   const [drinks, setDrinks] = useState(null);
   const [progress, setProgress] = useState(0);
   const [loadErr, setLoadErr] = useState('');
@@ -75,13 +77,25 @@ function Main({ user }) {
   const open = (id) => { history.pushState({ drink: id }, ''); setOpenId(id); };
   const close = () => { if (history.state?.drink) history.back(); else setOpenId(null); };
 
-  const index = useMemo(() => (drinks && data ? buildIndex(drinks, data.inventory) : []), [drinks, data?.inventory]);
-  const names = useMemo(() => (drinks ? allIngredientNames(drinks) : []), [drinks]);
+  // גיל: נשמר בחשבון. משתמש קיים בלי בחירה — לוקחים מהבחירה במסך הכניסה, אחרת שואלים
+  const adult = data?.adult ?? (data ? getPendingAge() : null);
+  useEffect(() => {
+    if (data && data.adult === undefined) { const p = getPendingAge(); if (p != null) setAdult(p); }
+    if (data && data.adult !== undefined) clearPendingAge(); // בחירה במכשיר משותף לא עוברת לחשבון הבא
+  }, [data?.adult]); // eslint-disable-line react-hooks/exhaustive-deps
+  const kids = adult === false;
+  const visibleInv = useMemo(() => (data ? (kids ? data.inventory.filter((i) => !isAlcoholKey(i.key)) : data.inventory) : []), [data?.inventory, kids]);
+  const setVisibleInv = (vis) => setInventory(kids ? [...data.inventory.filter((i) => isAlcoholKey(i.key)), ...vis] : vis);
+  const index = useMemo(() => (drinks && data ? buildIndex(kids ? drinks.filter(isAlcoholFree) : drinks, visibleInv) : []), [drinks, visibleInv, kids]);
+  const names = useMemo(() => (drinks ? allIngredientNames(drinks).filter((n) => !kids || !isAlcoholName(n)) : []), [drinks, kids]);
 
   if (error) return <Loading text={`שגיאה בגישה לנתונים: ${error.code || error.message}`} />;
   if (loadErr) return (
     <main className="center dots"><Logo size={40} /><div className="bubble"><b>לא הצלחתי לטעון מתכונים</b>{loadErr}</div><button className="btn red" onClick={() => load(true)}>לנסות שוב</button></main>
   );
+  if (data && data.adult === undefined && getPendingAge() == null) {
+    return <main className="center dots"><Logo size={40} /><AgeChoice value={null} onChange={setAdult} /></main>;
+  }
   if (!drinks || !data || tab === null) return <Loading text="מערבב את המאגר…" progress={drinks ? null : progress} />;
 
   const opened = openId && index.find((e) => e.drink.id === openId);
@@ -93,6 +107,7 @@ function Main({ user }) {
         <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>
           <Logo size={22} />
           <span className="version" dir="ltr">v{VERSION}</span>
+          {kids && <span className="version" style={{ background: '#9BD34C' }}>מוקטיילים</span>}
         </div>
         <button className="icon-btn" style={{ background: '#1FA3D9', color: '#fff', font: '700 24px var(--display)' }}
           aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => { if (confirm('להתנתק?')) logout(); }}>
@@ -100,7 +115,7 @@ function Main({ user }) {
         </button>
       </header>
 
-      {tab === 'inventory' && <Inventory inventory={data.inventory} setInventory={setInventory} ingredientNames={names} />}
+      {tab === 'inventory' && <Inventory inventory={visibleInv} setInventory={setVisibleInv} ingredientNames={names} kids={kids} />}
       {tab === 'cocktails' && <CocktailList {...common} inventoryCount={data.inventory.length} />}
       {tab === 'all' && <AllCocktails {...common} />}
       {tab === 'mine' && <Favorites {...common} />}

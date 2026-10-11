@@ -5,10 +5,11 @@ import { compressImage } from '../data/userData.js';
 import { GROUPS, getGroup, unitOf, UNIT_HE } from '../data/ingredients.js';
 import { newItem } from './Inventory.jsx';
 import { IconCamera, IconGallery } from './Icons.jsx';
+import { isAlcoholKey } from '../data/age.js';
 
 const OPTIONS = GROUPS.filter((g) => !g.assumed).sort((a, b) => a.he.localeCompare(b.he, 'he'));
 
-export default function ScanShelf({ inventory, setInventory }) {
+export default function ScanShelf({ inventory, setInventory, kids }) {
   const fileRef = useRef(null);
   const galleryRef = useRef(null);
   const [state, setState] = useState('idle'); // idle | busy | review | error
@@ -28,7 +29,7 @@ export default function ScanShelf({ inventory, setInventory }) {
       const data = await compressImage(f, 1400);
       setImg(data);
       const { identifyBottles } = await import('../data/vision.js');
-      const found = await identifyBottles(data);
+      const found = (await identifyBottles(data)).filter((r) => !kids || !isAlcoholKey(r.key));
       setRows(found.map((r) => ({ ...r, on: !have.has(r.key) && r.confidence >= 0.5, exists: have.has(r.key) })));
       setState(found.length ? 'review' : 'error');
       if (!found.length) setErr(src === 'camera'
