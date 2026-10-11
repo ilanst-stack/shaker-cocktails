@@ -33,11 +33,14 @@ export default function DrinkCard({ e, fav, rating, onOpen, onFav, highlight, sh
   return (
     <article className="card">
       <button className="card-open" aria-label={`פתח מתכון ${e.drink.name}`} onClick={onOpen} />
-      <img className="thumb" src={`${e.drink.thumb}/preview`} alt="" loading="lazy" width="64" height="64" />
+      {e.drink.custom
+        ? (e.drink.thumb ? <img className="thumb" src={e.drink.thumb} alt="" width="64" height="64" /> : <div className="thumb house-thumb" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16l-8 9z M12 13v7 M8 20h8" /></svg></div>)
+        : <img className="thumb" src={`${e.drink.thumb}/preview`} alt="" loading="lazy" width="64" height="64" />}
       <div className="body">
-        <div className="name" dir="ltr" style={{ textAlign: 'right' }}>{e.drink.name}</div>
+        <div className="name" dir="auto" style={{ textAlign: 'right' }}>{e.drink.name}</div>
         {he && <div style={{ fontSize: 13, fontWeight: 700 }}>{he}</div>}
         <div className="tags">
+          {e.drink.custom && <span className="tag house">מתכון בית</span>}
           {e.families.slice(0, 3).map((f) => <span key={f} className="tag">{FAM_HE[f]}</span>)}
           {rating != null && <span className="tag" style={{ background: '#111', color: '#FFE14D' }}>★ {rating}</span>}
         </div>

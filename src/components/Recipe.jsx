@@ -6,6 +6,7 @@ import { servingsText, missingText, alcoholText } from './DrinkCard.jsx';
 import { Star, IconBack, IconCamera, IconTrash, IconGallery } from './Icons.jsx';
 import { loadPhoto, savePhoto, removePhoto, compressImage } from '../data/userData.js';
 import { aiReady } from '../firebase.js';
+import ErrDetails, { errText } from './ErrDetails.jsx';
 
 const GLASS_HE = { tall: 'כוס היי-בול', short: 'כוס נמוכה (רוקס)', martini: 'כוס קוקטייל', flute: 'כוס שמפניה', wine: 'כוס יין', mug: 'ספל', shot: 'כוס צ׳ייסר' };
 
@@ -15,7 +16,7 @@ export function splitSteps(text) {
   return parts.length ? parts : ['מערבבים את כל המצרכים ומגישים.'];
 }
 
-export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onRate, onTasted }) {
+export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onRate, onTasted, onEdit }) {
   const d = e.drink;
   const [photo, setPhoto] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -29,21 +30,21 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
   const shown = d.ingredients.filter((i) => !getGroup(i.group)?.assumed);
   const callouts = shown;
   const missingSet = new Set(e.missing.map((i) => i.name));
-  const steps = splitSteps(d.instructions);
+  const steps = d.custom ? (d.stepsHe.length ? d.stepsHe : ['מערבבים את כל המצרכים ומגישים.']) : splitSteps(d.instructions);
 
   // תרגום ההוראות לעברית (Gemini), מוצג לצד המקור באנגלית
   const [heSteps, setHeSteps] = useState(null);
-  const [trState, setTrState] = useState(aiReady ? 'busy' : 'off');
+  const [trState, setTrState] = useState(d.custom ? 'custom' : aiReady ? 'busy' : 'off');
   const [trTry, setTrTry] = useState(0);
   const [trErr, setTrErr] = useState('');
   useEffect(() => {
-    if (!aiReady) return undefined;
+    if (!aiReady || d.custom) return undefined;
     let on = true;
     setTrState('busy');
     import('../data/translate.js')
       .then(({ translateSteps }) => translateSteps(uid, d.id, steps))
       .then((he) => { if (on) { setHeSteps(he); setTrState('done'); } })
-      .catch((err) => { console.error(err); if (on) { setTrState('error'); setTrErr(String(err?.code || err?.message || err).slice(0, 140)); } });
+      .catch((err) => { console.error(err); if (on) { setTrState('error'); setTrErr(errText(err)); } });
     return () => { on = false; };
   }, [d.id, trTry]); // eslint-disable-line react-hooks/exhaustive-deps
   const gType = glassType(d.glass);
@@ -70,10 +71,11 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
         <header className="topbar">
           <button className="icon-btn" aria-label="חזרה" onClick={onBack}><IconBack /></button>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 className="h1" dir="ltr" style={{ textAlign: 'right' }}>{d.name}</h1>
+            <h1 className="h1" dir="auto" style={{ textAlign: 'right' }}>{d.name}</h1>
             <div style={{ fontSize: 12, fontWeight: 700 }}>{GLASS_HE[gType]} · {d.category}</div>
           </div>
           <button className="icon-btn" style={{ width: 50, height: 50 }} aria-label={fav ? 'הסר מהמועדפים' : 'הוסף למועדפים'} aria-pressed={fav} onClick={onFav}><Star on={fav} size={30} /></button>
+          {onEdit && <button className="btn small" onClick={onEdit}>עריכה</button>}
         </header>
 
         <div style={{ padding: '0 16px' }}>
@@ -114,15 +116,15 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             {steps.map((s, k) => (
               <li key={k} className="step">
                 <div className="num">{k + 1}</div>
-                <div className="step-cols">
-                  <p className="he" lang="he">{heSteps?.[k] ?? (trState === 'busy' ? 'מתרגם…' : '—')}</p>
-                  <p className="en" dir="ltr" lang="en">{s}</p>
+                <div className={d.custom ? 'step-cols single' : 'step-cols'}>
+                  <p className="he" lang="he">{d.custom ? s : heSteps?.[k] ?? (trState === 'busy' ? 'מתרגם…' : '—')}</p>
+                  {!d.custom && <p className="en" dir="ltr" lang="en">{s}</p>}
                 </div>
               </li>
             ))}
           </ol>
           {trState === 'off' && <p className="muted" style={{ fontSize: 12, margin: '6px 0 0' }}>התרגום לעברית יופעל אחרי הגדרת Gemini.</p>}
-          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>{/busy|demand|50\d|429/i.test(trErr) ? 'שירות התרגום עמוס כרגע.' : 'התרגום לא הצליח כרגע.'} <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button></p>}
+          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>{/busy|demand|50\d|429/i.test(trErr) ? 'שירות התרגום עמוס כרגע.' : 'התרגום לא הצליח כרגע.'} <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button><ErrDetails text={trErr} /></p>}
 
           <div className="serve">
             <span>כוס: {GLASS_HE[gType]}</span>
@@ -131,6 +133,13 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             <span>הכנה: ~{e.minutes} דק׳</span>
             <span>{e.count} מצרכים</span>
           </div>
+
+          {d.custom && d.notes && (
+            <>
+              <h2 className="h2">הסיפור מאחורי הקוקטייל</h2>
+              <div className="notes-panel">{d.notes}</div>
+            </>
+          )}
 
           <h2 className="h2">הקוקטייל שלי</h2>
           <div className="panel">
@@ -152,7 +161,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
               {photo ? (
                 <img className="photo" src={photo} alt={`התמונה שלי של ${d.name}`} />
               ) : (
-                <img className="photo" src={d.thumb} alt={`${d.name} – תמונה מהמאגר`} style={{ opacity: 0.9 }} loading="lazy" />
+                d.thumb ? <img className="photo" src={d.custom ? d.thumb : d.thumb} alt={`${d.name} – תמונה`} style={{ opacity: 0.9 }} loading="lazy" /> : null
               )}
               <div className="row" style={{ marginTop: 12, gap: 10 }}>
                 <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={onFile} />

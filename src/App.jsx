@@ -14,6 +14,8 @@ import Favorites from './components/Favorites.jsx';
 import ForYou from './components/ForYou.jsx';
 import Recipe from './components/Recipe.jsx';
 import AllCocktails from './components/AllCocktails.jsx';
+import CustomEditor from './components/CustomEditor.jsx';
+import { useCustomDrinks } from './data/custom.js';
 import { IconList, IconGlass, IconStarLine, IconSpark, IconSearch } from './components/Icons.jsx';
 
 export default function App() {
@@ -58,6 +60,8 @@ function Main({ user }) {
   const [loadErr, setLoadErr] = useState('');
   const [tab, setTab] = useState(null);
   const [openId, setOpenId] = useState(null);
+  const [editing, setEditing] = useState(null); // null | 'new' | drink
+  const custom = useCustomDrinks(user.uid);
 
   const load = (force) => {
     setLoadErr('');
@@ -88,7 +92,8 @@ function Main({ user }) {
   const kids = adult === false;
   const visibleInv = useMemo(() => (data ? (kids ? data.inventory.filter((i) => !isAlcoholKey(i.key)) : data.inventory) : []), [data?.inventory, kids]);
   const setVisibleInv = (vis) => setInventory(kids ? [...data.inventory.filter((i) => isAlcoholKey(i.key)), ...vis] : vis);
-  const index = useMemo(() => (drinks && data ? buildIndex(kids ? drinks.filter(isAlcoholFree) : drinks, visibleInv) : []), [drinks, visibleInv, kids]);
+  const allDrinks = useMemo(() => (drinks ? [...custom, ...drinks] : null), [drinks, custom]);
+  const index = useMemo(() => (allDrinks && data ? buildIndex(kids ? allDrinks.filter(isAlcoholFree) : allDrinks, visibleInv) : []), [allDrinks, visibleInv, kids]);
   const names = useMemo(() => (drinks ? allIngredientNames(drinks).filter((n) => !kids || !isAlcoholName(n)) : []), [drinks, kids]);
 
   if (error) return <Loading text={`שגיאה בגישה לנתונים: ${error.code || error.message}`} />;
@@ -101,7 +106,7 @@ function Main({ user }) {
   if (!drinks || !data || tab === null) return <Loading text="מערבב את המאגר…" progress={drinks ? null : progress} />;
 
   const opened = openId && index.find((e) => e.drink.id === openId);
-  const common = { index, user: data, onOpen: open, onFav: toggleFavorite };
+  const common = { index, user: data, onOpen: open, onFav: toggleFavorite, onNewCustom: () => setEditing('new') };
 
   return (
     <div className="app dots">
@@ -131,7 +136,11 @@ function Main({ user }) {
 
       {opened && (
         <Recipe e={opened} uid={user.uid} fav={data.favorites.includes(opened.drink.id)} rating={data.ratings[opened.drink.id]} tasted={!!data.tasted[opened.drink.id]}
-          onBack={close} onFav={() => toggleFavorite(opened.drink.id)} onRate={(r) => setRating(opened.drink.id, r)} onTasted={(on) => setTasted(opened.drink.id, on)} />
+          onBack={close} onFav={() => toggleFavorite(opened.drink.id)} onRate={(r) => setRating(opened.drink.id, r)} onTasted={(on) => setTasted(opened.drink.id, on)} onEdit={opened.drink.custom ? () => setEditing(opened.drink) : null} />
+      )}
+      {editing && (
+        <CustomEditor uid={user.uid} kids={kids} drink={editing === 'new' ? null : editing}
+          onClose={() => setEditing(null)} onSaved={(id) => { setEditing(null); if (openId !== id) open(id); }} />
       )}
     </div>
   );

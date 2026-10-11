@@ -160,6 +160,14 @@ for (const g of GROUPS) {
   byAlias.set(g.key, g);
   for (const a of g.aliases) byAlias.set(a, g);
 }
+// גם שמות בעברית (למתכוני בית): "ליקר צמחים (יגרמייסטר / שרטרז)" → "ליקר צמחים", "יגרמייסטר", "שרטרז"
+for (const g of GROUPS) {
+  const he = g.he.trim().toLowerCase();
+  if (!byAlias.has(he)) byAlias.set(he, g);
+  for (const part of he.replace(/[()]/g, ' / ').split('/').map((x) => x.trim()).filter((x) => x.length > 1)) {
+    if (!byAlias.has(part)) byAlias.set(part, g);
+  }
+}
 
 export const norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
 

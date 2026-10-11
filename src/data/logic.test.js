@@ -136,3 +136,17 @@ test('lemon juice from fresh lemons, syrup is not juice', () => {
   assert.equal(e.subs[0].squeeze, true);
   assert.equal(groupOf('Passion fruit syrup').key, 'passion fruit syrup');
 });
+
+import { customToDrink } from './customModel.js';
+test('house recipe converts and matches inventory', () => {
+  const d = customToDrink('abc', { name: 'הסוד של צורן', glass: 'Highball glass', steps: ['קרח', 'מוזגים'], ingredients: [
+    { name: 'וודקה', qty: 50, unit: 'ml' }, { name: 'מיץ לימון', qty: 2, unit: 'tbsp' }, { name: 'נענע', qty: 6, unit: 'pcs' },
+  ] });
+  assert.equal(d.id, 'c_abc');
+  assert.equal(d.ingredients[0].group, 'vodka');
+  assert.equal(d.ingredients[1].ml, 30);
+  assert.equal(d.alcoholic, 'Alcoholic');
+  const [e] = buildIndex([d], [{ key: 'vodka', unit: 'ml', amount: 500 }, { key: 'lemon', unit: 'pcs', amount: 10 }, { key: 'mint', unit: 'pcs', unlimited: true }]);
+  assert.equal(e.ready, true);
+  assert.equal(e.servings, 10);
+});

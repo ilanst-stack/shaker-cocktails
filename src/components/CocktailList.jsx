@@ -9,7 +9,7 @@ function readSort() {
   return { id: 'match', dir: 'desc' };
 }
 
-export function SortBar({ sort, setSort }) {
+export function SortBar({ sort, setSort, onlyHouse, setOnlyHouse }) {
   const dirLabel = {
     match: ['הכי מתאים קודם', 'הכי פחות מתאים קודם'],
     fav: ['מועדפים קודם', 'לא-מועדפים קודם'],
@@ -29,11 +29,18 @@ export function SortBar({ sort, setSort }) {
         aria-label={`כיוון: ${sort.dir === 'desc' ? dirLabel[0] : dirLabel[1]} — לחץ להפוך`}>
         <span aria-hidden="true">{sort.dir === 'desc' ? '▼' : '▲'}</span> {sort.dir === 'desc' ? dirLabel[0] : dirLabel[1]}
       </button>
+      {setOnlyHouse && (
+        <label className="house-check">
+          <input type="checkbox" checked={!!onlyHouse} onChange={(e) => setOnlyHouse(e.target.checked)} />
+          רק מתכוני הבית
+        </label>
+      )}
     </div>
   );
 }
 
 export default function CocktailList({ index, user, onOpen, onFav, inventoryCount }) {
+  const [onlyHouse, setOnlyHouse] = useState(false);
   const [mode, setMode] = useState('ready'); // ready | almost
   const [base, setBase] = useState('all');
   const [fam, setFam] = useState(null);
@@ -48,8 +55,9 @@ export default function CocktailList({ index, user, onOpen, onFav, inventoryCoun
     let l = mode === 'ready' ? index.filter((e) => e.ready) : index.filter((e) => !e.ready && e.gap <= 2);
     if (base !== 'all') l = l.filter((e) => e.base === base);
     if (fam) l = l.filter((e) => e.families.includes(fam));
+    if (onlyHouse) l = l.filter((e) => e.drink.custom);
     return sortEntries(l, sort.id, sort.dir, user);
-  }, [index, mode, base, fam, sort, user]);
+  }, [index, mode, base, fam, sort, user, onlyHouse]);
 
   const basesPresent = useMemo(() => {
     const pool = mode === 'ready' ? index.filter((e) => e.ready) : index.filter((e) => !e.ready && e.gap <= 2);
@@ -86,7 +94,7 @@ export default function CocktailList({ index, user, onOpen, onFav, inventoryCoun
         {FAMILIES.map((f) => <button key={f.id} className="chip sm" aria-pressed={fam === f.id} onClick={() => setFam(fam === f.id ? null : f.id)}>{f.he}</button>)}
       </ScrollRow>
 
-      <SortBar sort={sort} setSort={setSort} />
+      <SortBar sort={sort} setSort={setSort} onlyHouse={onlyHouse} setOnlyHouse={setOnlyHouse} />
 
       {list.length === 0 && <div className="empty"><b style={{ font: '700 30px var(--display)' }}>אין כאן כלום (עדיין)</b><p>נסה לסנן אחרת, או להוסיף מצרכים למלאי.</p></div>}
 

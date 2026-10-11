@@ -6,11 +6,12 @@ import { HE_NAMES } from '../data/hebrewNames.js';
 import DrinkCard from './DrinkCard.jsx';
 import ScrollRow from './ScrollRow.jsx';
 import { SortBar } from './CocktailList.jsx';
-import { IconSearch } from './Icons.jsx';
+import { IconSearch, IconPlus } from './Icons.jsx';
 
 const simplify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[׳'"`’\-–_.]/g, '').replace(/\s+/g, ' ').trim();
 
-export default function AllCocktails({ index, user, onOpen, onFav }) {
+export default function AllCocktails({ index, user, onOpen, onFav, onNewCustom }) {
+  const [onlyHouse, setOnlyHouse] = useState(false);
   const [q, setQ] = useState('');
   const [base, setBase] = useState('all');
   const [onlyReady, setOnlyReady] = useState(false);
@@ -36,13 +37,17 @@ export default function AllCocktails({ index, user, onOpen, onFav }) {
     let entries = l.map((s) => s.e);
     if (base !== 'all') entries = entries.filter((e) => e.base === base);
     if (onlyReady) entries = entries.filter((e) => e.ready);
+    if (onlyHouse) entries = entries.filter((e) => e.drink.custom);
     if (!t || sort.id !== 'name') entries = sortEntries(entries, sort.id, sort.dir, user);
     return entries;
-  }, [searchable, q, base, onlyReady, sort, user]);
+  }, [searchable, q, base, onlyReady, onlyHouse, sort, user]);
 
   return (
     <section className="screen" aria-label="כל הקוקטיילים">
-      <h1 className="h1" style={{ margin: '8px 0 12px' }}>כל הקוקטיילים</h1>
+      <div className="row" style={{ justifyContent: 'space-between', margin: '8px 0 12px', gap: 10 }}>
+        <h1 className="h1" style={{ margin: 0 }}>כל הקוקטיילים</h1>
+        <button className="btn red small" onClick={onNewCustom}><IconPlus /> מתכון בית</button>
+      </div>
       <div className="panel" style={{ position: 'relative' }}>
         <label htmlFor="all-search" style={{ fontWeight: 700, display: 'block', marginBottom: 6 }}>חיפוש לפי שם קוקטייל או מצרך</label>
         <div style={{ position: 'relative' }}>
@@ -61,11 +66,14 @@ export default function AllCocktails({ index, user, onOpen, onFav }) {
         <button className="chip" aria-pressed={base === 'all'} onClick={() => setBase('all')}>הכל</button>
         {BASES.map((b) => <button key={b.id} className="chip" aria-pressed={base === b.id} onClick={() => setBase(b.id)}>{b.he}</button>)}
       </ScrollRow>
-      <SortBar sort={sort} setSort={setSort} />
+      <SortBar sort={sort} setSort={setSort} onlyHouse={onlyHouse} setOnlyHouse={setOnlyHouse} />
 
       <p style={{ fontWeight: 700, margin: '14px 0 8px' }} role="status">{list.length} קוקטיילים{q ? ` עבור "${q}"` : ' במאגר'}</p>
-      {list.length === 0 && (
-        <div className="bubble"><b>לא מצאתי קוקטייל כזה.</b>נסה שם באנגלית, או חלק מהשם (למשל "spritz").</div>
+      {list.length === 0 && !onlyHouse && (
+        <div className="bubble"><b>לא מצאתי קוקטייל כזה.</b>נסה שם באנגלית, או חלק מהשם (למשל "spritz"). המצאת משהו משלך? <button className="btn small" style={{ marginTop: 8 }} onClick={onNewCustom}><IconPlus /> הוסף מתכון בית</button></div>
+      )}
+      {list.length === 0 && onlyHouse && (
+        <div className="bubble"><b>עוד אין מתכוני בית.</b><button className="btn small" style={{ marginTop: 8 }} onClick={onNewCustom}><IconPlus /> הוסף את הראשון</button></div>
       )}
       <div className="cards">
         {list.slice(0, limit).map((e) => (

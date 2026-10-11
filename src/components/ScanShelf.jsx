@@ -5,6 +5,7 @@ import { compressImage } from '../data/userData.js';
 import { GROUPS, getGroup, unitOf, UNIT_HE } from '../data/ingredients.js';
 import { newItem } from './Inventory.jsx';
 import { IconCamera, IconGallery } from './Icons.jsx';
+import ErrDetails, { errText } from './ErrDetails.jsx';
 import { isAlcoholKey } from '../data/age.js';
 
 const OPTIONS = GROUPS.filter((g) => !g.assumed).sort((a, b) => a.he.localeCompare(b.he, 'he'));
@@ -16,6 +17,7 @@ export default function ScanShelf({ inventory, setInventory, kids }) {
   const [img, setImg] = useState(null);
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState('');
+  const [errInfo, setErrInfo] = useState('');
   const [source, setSource] = useState('camera'); // camera | gallery
   const have = new Map(inventory.map((i) => [i.key, i]));
 
@@ -24,7 +26,7 @@ export default function ScanShelf({ inventory, setInventory, kids }) {
     setSource(src);
     ev.target.value = '';
     if (!f) return;
-    setState('busy'); setErr('');
+    setState('busy'); setErr(''); setErrInfo('');
     try {
       const data = await compressImage(f, 1400);
       setImg(data);
@@ -36,7 +38,8 @@ export default function ScanShelf({ inventory, setInventory, kids }) {
         ? 'לא זיהיתי משקאות בתמונה. נסה לצלם שוב — קרוב יותר, עם התווית מול המצלמה.'
         : 'לא זיהיתי משקאות בתמונה. נסה תמונה אחרת, שבה התוויות ברורות.');
     } catch (e) {
-      console.error(e); // הפרטים הטכניים נשארים רק בקונסול
+      console.error(e);
+      setErrInfo(errText(e));
       const { isBusyError } = await import('../data/ai.js');
       setErr(isBusyError(e)
         ? 'שירות הזיהוי עמוס כרגע. נסה שוב בעוד דקה.'
@@ -63,9 +66,14 @@ export default function ScanShelf({ inventory, setInventory, kids }) {
   const chosen = rows.filter((r) => r.on).length;
 
   return (
-    <div className="panel" style={{ marginTop: 16, background: '#1FA3D9', color: '#fff' }}>
-      <div style={{ font: '700 28px/1 var(--display)' }}>צלם את הבר!</div>
-      <div style={{ fontSize: 13, marginTop: 4 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
+    <div className="panel scan-panel">
+      <div className="row" style={{ gap: 10, alignItems: 'center' }}>
+        <div className="burst scan-burst" aria-hidden="true"><IconCamera /></div>
+        <div>
+          <div style={{ font: '700 30px/1 var(--display)' }}>צלם את הבר!</div>
+          <div style={{ fontSize: 13, marginTop: 2 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
+        </div>
+      </div>
       <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(ev) => onFile(ev, 'camera')} />
       <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(ev) => onFile(ev, 'gallery')} />
       <div className="row" style={{ gap: 10, marginTop: 10 }}>
@@ -77,7 +85,7 @@ export default function ScanShelf({ inventory, setInventory, kids }) {
         </button>
       </div>
       {!aiReady && <p style={{ fontSize: 13, margin: '8px 0 0', fontWeight: 700 }}>הזיהוי עדיין לא הופעל — מחכה להגדרת Fraud Defense ב-Firebase.</p>}
-      {state === 'error' && <p role="alert" style={{ fontWeight: 700, margin: '10px 0 0', background: '#fff', color: '#111', border: '2px solid #111', padding: '6px 10px' }}>{err}</p>}
+      {state === 'error' && <div role="alert" className="scan-err">{err}<ErrDetails text={errInfo} /></div>}
 
       {state === 'review' && (
         <div style={{ marginTop: 12, background: '#fff', color: '#111', border: '3px solid #111', padding: 10 }}>

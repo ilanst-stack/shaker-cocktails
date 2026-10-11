@@ -171,3 +171,23 @@ button { cursor: pointer; }
 .age-btn b { font: 700 30px/1 var(--display); }
 .age-btn span { font-size: 12px; font-weight: 500; line-height: 1.25; }
 .age-btn.on { background: var(--ink); color: var(--yellow); }
+.err-details { margin-top: 6px; font-size: 12px; font-weight: 400; }
+.err-details summary { cursor: pointer; text-decoration: underline; }
+.err-details code { display: block; margin-top: 4px; padding: 6px; background: #f3f3f3; border: 1px dashed #999; white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; font-size: 11px; }
+.scan-panel { margin-top: 16px; background-color: #fff; background-image: radial-gradient(rgba(232,50,43,0.22) 1.6px, transparent 1.7px); background-size: 10px 10px; }
+.scan-burst { width: 58px; height: 58px; flex-shrink: 0; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; }
+.scan-err { font-weight: 700; margin-top: 10px; background: #FFF4C2; border: 2px solid var(--ink); padding: 6px 10px; }
+.house-check { display: inline-flex; align-items: center; gap: 6px; font: 700 14px var(--body); min-height: 40px; padding: 0 8px; border: 2.5px dashed #2E7D32; background: #E8F5E9; }
+.house-check input { width: 20px; height: 20px; accent-color: #2E7D32; }
+.tag.house { background: #2E7D32; color: #fff; }
+.house-thumb { display: flex; align-items: center; justify-content: center; background: #E8F5E9 !important; }
+.form label { display: block; font-weight: 700; font-size: 14px; margin: 10px 0 4px; }
+.form label:first-child { margin-top: 0; }
+.form textarea.field { resize: vertical; font-family: var(--body); line-height: 1.4; }
+.ing-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+.ing-row .field { min-height: 44px; font-size: 15px; padding: 6px 8px; }
+.ing-row .field:first-child { flex: 1; min-width: 0; }
+.ing-row .qty { width: 64px; flex-shrink: 0; }
+.ing-row .unit { width: 86px; flex-shrink: 0; }
+.notes-panel { background: #E8F5E9; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 12px 14px; white-space: pre-wrap; line-height: 1.5; }
+.step-cols.single { grid-template-columns: minmax(0, 1fr); }
