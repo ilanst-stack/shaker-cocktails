@@ -2,12 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { BASES, FAMILIES, SORTS, sortEntries } from '../data/match.js';
 import DrinkCard from './DrinkCard.jsx';
 import ScrollRow from './ScrollRow.jsx';
+import { useSticky } from '../data/sticky.js';
 
-const SORT_KEY = 'shaker.sort.v1';
-function readSort() {
-  try { const s = JSON.parse(localStorage.getItem(SORT_KEY)); if (s && SORTS.some((x) => x.id === s.id)) return s; } catch { /* ignore */ }
-  return { id: 'match', dir: 'desc' };
-}
 
 export function SortBar({ sort, setSort, onlyHouse, setOnlyHouse }) {
   const dirLabel = {
@@ -40,13 +36,12 @@ export function SortBar({ sort, setSort, onlyHouse, setOnlyHouse }) {
 }
 
 export default function CocktailList({ index, user, onOpen, onFav, inventoryCount }) {
-  const [onlyHouse, setOnlyHouse] = useState(false);
-  const [mode, setMode] = useState('ready'); // ready | almost
-  const [base, setBase] = useState('all');
-  const [fam, setFam] = useState(null);
+  const [onlyHouse, setOnlyHouse] = useSticky('mine.house', false);
+  const [mode, setMode] = useSticky('mine.mode', 'ready'); // ready | almost
+  const [base, setBase] = useSticky('mine.base', 'all');
+  const [fam, setFam] = useSticky('mine.fam', null);
   const [limit, setLimit] = useState(40);
-  const [sort, setSort] = useState(readSort);
-  useEffect(() => { try { localStorage.setItem(SORT_KEY, JSON.stringify(sort)); } catch { /* ignore */ } }, [sort]);
+  const [sort, setSort] = useSticky('mine.sort', { id: 'match', dir: 'desc' });
 
   const readyCount = useMemo(() => index.filter((e) => e.ready).length, [index]);
   const almostCount = useMemo(() => index.filter((e) => !e.ready && e.gap <= 2).length, [index]);

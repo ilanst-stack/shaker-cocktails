@@ -5,17 +5,18 @@ import { heName } from '../data/ingredients.js';
 import { HE_NAMES } from '../data/hebrewNames.js';
 import DrinkCard from './DrinkCard.jsx';
 import ScrollRow from './ScrollRow.jsx';
+import { useSticky } from '../data/sticky.js';
 import { SortBar } from './CocktailList.jsx';
 import { IconSearch, IconPlus } from './Icons.jsx';
 
 const simplify = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[׳'"`’\-–_.]/g, '').replace(/\s+/g, ' ').trim();
 
 export default function AllCocktails({ index, user, onOpen, onFav, onNewCustom }) {
-  const [onlyHouse, setOnlyHouse] = useState(false);
-  const [q, setQ] = useState('');
-  const [base, setBase] = useState('all');
-  const [onlyReady, setOnlyReady] = useState(false);
-  const [sort, setSort] = useState({ id: 'name', dir: 'asc' });
+  const [onlyHouse, setOnlyHouse] = useSticky('all.house', false);
+  const [q, setQ] = useSticky('all.q', '');
+  const [base, setBase] = useSticky('all.base', 'all');
+  const [onlyReady, setOnlyReady] = useSticky('all.ready', false);
+  const [sort, setSort] = useSticky('all.sort', { id: 'name', dir: 'asc' });
   const [limit, setLimit] = useState(40);
 
   // אינדקס חיפוש: שם באנגלית, שם עברי (אם יש), ושמות המצרכים בעברית ובאנגלית

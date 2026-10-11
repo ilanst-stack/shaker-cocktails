@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react';
 import DrinkCard from './DrinkCard.jsx';
 import { SortBar } from './CocktailList.jsx';
 import { sortEntries } from '../data/match.js';
+import { useSticky } from '../data/sticky.js';
 
 export default function Favorites({ index, user, onOpen, onFav }) {
-  const [tab, setTab] = useState('fav');
-  const [sort, setSort] = useState({ id: 'rating', dir: 'desc' });
-  const [onlyHouse, setOnlyHouse] = useState(false);
+  const [tab, setTab] = useSticky('fav.tab', 'fav');
+  const [sort, setSort] = useSticky('fav.sort', { id: 'rating', dir: 'desc' });
+  const [onlyHouse, setOnlyHouse] = useSticky('fav.house', false);
   const byId = useMemo(() => new Map(index.map((e) => [e.drink.id, e])), [index]);
   const favs = user.favorites.map((id) => byId.get(id)).filter(Boolean);
   const tasted = Object.entries(user.tasted || {})
