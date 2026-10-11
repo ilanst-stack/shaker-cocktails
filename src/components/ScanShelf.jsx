@@ -4,12 +4,13 @@ import { aiReady } from '../firebase.js';
 import { compressImage } from '../data/userData.js';
 import { GROUPS, getGroup, unitOf, UNIT_HE } from '../data/ingredients.js';
 import { newItem } from './Inventory.jsx';
-import { IconCamera } from './Icons.jsx';
+import { IconCamera, IconGallery } from './Icons.jsx';
 
 const OPTIONS = GROUPS.filter((g) => !g.assumed).sort((a, b) => a.he.localeCompare(b.he, 'he'));
 
 export default function ScanShelf({ inventory, setInventory }) {
   const fileRef = useRef(null);
+  const galleryRef = useRef(null);
   const [state, setState] = useState('idle'); // idle | busy | review | error
   const [img, setImg] = useState(null);
   const [rows, setRows] = useState([]);
@@ -54,14 +55,16 @@ export default function ScanShelf({ inventory, setInventory }) {
 
   return (
     <div className="panel" style={{ marginTop: 16, background: '#1FA3D9', color: '#fff' }}>
-      <div className="row" style={{ justifyContent: 'space-between', gap: 10 }}>
-        <div>
-          <div style={{ font: '700 28px/1 var(--display)' }}>צלם את הבר!</div>
-          <div style={{ fontSize: 13, marginTop: 4 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
-        </div>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
-        <button className="btn red small" disabled={!aiReady || state === 'busy'} onClick={() => fileRef.current?.click()}>
+      <div style={{ font: '700 28px/1 var(--display)' }}>צלם את הבר!</div>
+      <div style={{ fontSize: 13, marginTop: 4 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={onFile} />
+      <input ref={galleryRef} type="file" accept="image/*" hidden onChange={onFile} />
+      <div className="row" style={{ gap: 10, marginTop: 10 }}>
+        <button className="btn red small" style={{ flex: 1 }} disabled={!aiReady || state === 'busy'} onClick={() => fileRef.current?.click()}>
           <IconCamera /> {state === 'busy' ? 'מזהה…' : 'צילום'}
+        </button>
+        <button className="btn small" style={{ flex: 1 }} disabled={!aiReady || state === 'busy'} onClick={() => galleryRef.current?.click()}>
+          <IconGallery /> מהגלריה
         </button>
       </div>
       {!aiReady && <p style={{ fontSize: 13, margin: '8px 0 0', fontWeight: 700 }}>הזיהוי עדיין לא הופעל — מחכה להגדרת Fraud Defense ב-Firebase.</p>}

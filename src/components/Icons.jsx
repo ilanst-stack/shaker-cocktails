@@ -6,6 +6,7 @@ export const IconStarLine = () => (<svg aria-hidden="true" width="24" height="24
 export const IconSpark = () => (<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" {...S}><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z" /></svg>);
 export const IconBack = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S} strokeWidth={2.8}><path d="M9 5l7 7-7 7" /></svg>);
 export const IconCamera = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>);
+export const IconGallery = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S}><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="M21 16l-5-5-9 9" /></svg>);
 export const IconTrash = () => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" {...S}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>);
 export const IconPlus = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S} strokeWidth={3}><path d="M12 5v14M5 12h14" /></svg>);
 export const IconSearch = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S}><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>);

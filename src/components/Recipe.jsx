@@ -3,7 +3,7 @@ import GlassArt, { glassType } from './GlassArt.jsx';
 import { heName, colorOf, getGroup } from '../data/ingredients.js';
 import { fmtIngredient } from '../data/measure.js';
 import { servingsText, missingText, alcoholText } from './DrinkCard.jsx';
-import { Star, IconBack, IconCamera, IconTrash } from './Icons.jsx';
+import { Star, IconBack, IconCamera, IconTrash, IconGallery } from './Icons.jsx';
 import { loadPhoto, savePhoto, removePhoto, compressImage } from '../data/userData.js';
 import { aiReady } from '../firebase.js';
 
@@ -21,6 +21,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const fileRef = useRef(null);
+  const galleryRef = useRef(null);
 
   useEffect(() => { let on = true; loadPhoto(uid, d.id).then((p) => on && setPhoto(p)).catch(() => {}); return () => { on = false; }; }, [uid, d.id]);
   useEffect(() => { window.scrollTo(0, 0); }, [d.id]);
@@ -154,9 +155,13 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
                 <img className="photo" src={d.thumb} alt={`${d.name} – תמונה מהמאגר`} style={{ opacity: 0.9 }} loading="lazy" />
               )}
               <div className="row" style={{ marginTop: 12, gap: 10 }}>
-                <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+                <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={onFile} />
+                <input ref={galleryRef} type="file" accept="image/*" hidden onChange={onFile} />
                 <button className="btn cyan small" style={{ flex: 1 }} disabled={busy} onClick={() => fileRef.current?.click()}>
-                  <IconCamera /> {busy ? 'שומר…' : photo ? 'החלף תמונה' : 'צילום / העלאת תמונה'}
+                  <IconCamera /> {busy ? 'שומר…' : 'צילום'}
+                </button>
+                <button className="btn small" style={{ flex: 1 }} disabled={busy} onClick={() => galleryRef.current?.click()}>
+                  <IconGallery /> מהגלריה
                 </button>
                 {photo && <button className="icon-btn" aria-label="מחק תמונה" onClick={async () => { await removePhoto(uid, d.id); setPhoto(null); }}><IconTrash /></button>}
               </div>

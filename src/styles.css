@@ -161,4 +161,4 @@ button { cursor: pointer; }
 
 .version { font: 700 12px var(--body); background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 1px 8px; }
 .logo-box { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 6px 12px; transform: rotate(-2deg); }
-.logo-word { display: flex; flex-direction: column; font-family: 'Jost', sans-serif; font-weight: 600; letter-spacing: 0.04em; color: #0C0D0C; }
+.logo-word { display: flex; flex-direction: column; font-family: 'Kumbh Sans', sans-serif; font-weight: 600; letter-spacing: 0.04em; color: #0C0D0C; }
