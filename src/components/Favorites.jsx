@@ -14,7 +14,7 @@ export default function Favorites({ index, user, onOpen, onFav }) {
   const list = sortEntries(tab === 'fav' ? favs : tasted, sort.id, sort.dir, user);
   return (
     <section className="screen" aria-label="המועדפים שלי">
-      <h1 className="h1" style={{ margin: '8px 0 12px' }}>שלי</h1>
+      <h1 className="h1" style={{ margin: '8px 0 12px' }}>מועדפים וטעימות</h1>
       <div className="seg" role="group" aria-label="תצוגה">
         <button aria-pressed={tab === 'fav'} onClick={() => setTab('fav')}>★ מועדפים ({favs.length})</button>
         <button aria-pressed={tab === 'tasted'} onClick={() => setTab('tasted')}>✔ טעמתי ({tasted.length})</button>

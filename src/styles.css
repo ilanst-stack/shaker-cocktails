@@ -53,9 +53,10 @@ button { cursor: pointer; }
 .scrollrow { position: relative; }
 .scrollrow.inset { margin: 0 -16px; }
 .scrollrow.inset .chips { padding-inline: 16px; }
-.sr-arrow { position: absolute; top: 4px; z-index: 3; width: 38px; height: 44px; border: 3px solid var(--ink); background: var(--ink); color: var(--yellow); font: 700 30px/1 var(--display); padding: 0 0 4px; box-shadow: 2px 2px 0 var(--red); }
-.sr-start { right: 0; border-radius: 0 0 0 999px; border-radius: 999px 0 0 999px; }
-.sr-end { left: 0; border-radius: 0 999px 999px 0; }
+.sr-arrow { position: absolute; top: 8px; z-index: 3; width: 36px; height: 36px; border-radius: 50%; border: 2.5px solid var(--ink); background: #fff; color: var(--ink); padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0 var(--ink); }
+.sr-arrow:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+.sr-start { right: 6px; }
+.sr-end { left: 6px; }
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 4px 10px; scrollbar-width: none; overscroll-behavior-x: contain; }
 .chips::-webkit-scrollbar { display: none; }
 .chip { flex-shrink: 0; min-height: 44px; padding: 4px 16px; border: 3px solid var(--ink); border-radius: 999px; font: 700 22px var(--display); background: #fff; box-shadow: 3px 3px 0 var(--ink); white-space: nowrap; }
@@ -92,7 +93,7 @@ button { cursor: pointer; }
 
 /* ניווט תחתון */
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 520px; display: flex; justify-content: space-around; background: var(--ink); padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); z-index: 20; }
-.tabbar button { min-width: 64px; min-height: 48px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--yellow); background: transparent; border: none; border-radius: 10px; font: 700 12px var(--body); padding-top: 4px; }
+.tabbar button { flex: 1; min-width: 0; min-height: 52px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--yellow); background: transparent; border: none; border-radius: 10px; font: 700 11px/1.15 var(--body); padding: 4px 2px; text-align: center; }
 .tabbar button[aria-current='page'] { background: var(--red); color: #fff; }
 
 /* מלאי */
@@ -120,7 +121,19 @@ button { cursor: pointer; }
 .callout b { font: 700 26px/0.9 var(--display); display: block; }
 .callout span { font-size: 12px; font-weight: 700; }
 .glass-wrap { position: absolute; bottom: 10px; left: 12px; }
-.burst-badge { position: absolute; top: 8px; left: 8px; width: 96px; height: 96px; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; font: 700 20px/0.95 var(--display); padding: 10px; }
+.burst-badge { position: absolute; top: 6px; left: 6px; width: 118px; height: 118px; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; font: 700 20px/0.9 var(--display); padding: 18px; }
+.burst-badge span { display: flex; flex-direction: column; align-items: center; }
+.burst-badge small { font-size: 16px; }
+.burst-badge big { font-size: 40px; line-height: 0.85; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.step { display: flex; gap: 10px; align-items: flex-start; background: #fff; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 10px; }
+.step .num { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: var(--ink); color: var(--yellow); display: flex; align-items: center; justify-content: center; font: 700 22px var(--display); }
+.step-cols { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.step-cols p { margin: 0; font-size: 14px; line-height: 1.4; }
+.step-cols .he { font-weight: 700; }
+.step-cols .en { text-align: left; color: #444; border-right: 2px dashed #bbb; padding-right: 10px; }
+.zero-btn { width: 40px !important; height: 40px !important; border: 2.5px solid var(--ink) !important; border-radius: 50%; font: 700 20px var(--display); background: #fff !important; margin-left: 4px; }
+.zero-btn[aria-pressed='true'] { background: var(--ink) !important; color: var(--yellow); }
 .frames { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .frame { background: #fff; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 .frame .num { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--yellow); display: flex; align-items: center; justify-content: center; font: 700 22px var(--display); }

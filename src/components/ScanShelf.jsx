@@ -59,7 +59,7 @@ export default function ScanShelf({ inventory, setInventory }) {
           <div style={{ font: '700 28px/1 var(--display)' }}>צלם את הבר!</div>
           <div style={{ fontSize: 13, marginTop: 4 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
         </div>
-        <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={onFile} />
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
         <button className="btn red small" disabled={!aiReady || state === 'busy'} onClick={() => fileRef.current?.click()}>
           <IconCamera /> {state === 'busy' ? 'מזהה…' : 'צילום'}
         </button>

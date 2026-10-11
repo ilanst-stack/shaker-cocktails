@@ -10,5 +10,5 @@ export const firebaseConfig = {
 
 // זיהוי בקבוקים מתמונה (Gemini דרך Firebase AI Logic) — דורש App Check עם reCAPTCHA v3
 // ↓↓↓ כאן מדביקים את ה-Site key של reCAPTCHA (לא את ה-Secret!) ↓↓↓
-export const recaptchaSiteKey = '';
+export const recaptchaSiteKey = '6Lf-FeotAAAAAP6fJUQQjF1c3eOH-oanxN3Fa6w4';
 export const geminiModel = 'gemini-3.8-flash';

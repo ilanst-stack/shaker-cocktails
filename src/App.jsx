@@ -9,7 +9,8 @@ import CocktailList from './components/CocktailList.jsx';
 import Favorites from './components/Favorites.jsx';
 import ForYou from './components/ForYou.jsx';
 import Recipe from './components/Recipe.jsx';
-import { IconList, IconGlass, IconStarLine, IconSpark } from './components/Icons.jsx';
+import AllCocktails from './components/AllCocktails.jsx';
+import { IconList, IconGlass, IconStarLine, IconSpark, IconSearch } from './components/Icons.jsx';
 
 export default function App() {
   const [user, setUser] = useState(undefined);
@@ -40,8 +41,9 @@ function Loading({ text, progress }) {
 
 const TABS = [
   { id: 'inventory', he: 'המלאי', Icon: IconList },
-  { id: 'cocktails', he: 'קוקטיילים', Icon: IconGlass },
-  { id: 'mine', he: 'שלי', Icon: IconStarLine },
+  { id: 'cocktails', he: 'הקוקטיילים שלי', Icon: IconGlass },
+  { id: 'all', he: 'כל הקוקטיילים', Icon: IconSearch },
+  { id: 'mine', he: 'מועדפים', Icon: IconStarLine },
   { id: 'foryou', he: 'בשבילך', Icon: IconSpark },
 ];
 
@@ -95,6 +97,7 @@ function Main({ user }) {
 
       {tab === 'inventory' && <Inventory inventory={data.inventory} setInventory={setInventory} ingredientNames={names} />}
       {tab === 'cocktails' && <CocktailList {...common} inventoryCount={data.inventory.length} />}
+      {tab === 'all' && <AllCocktails {...common} />}
       {tab === 'mine' && <Favorites {...common} />}
       {tab === 'foryou' && <ForYou {...common} />}
 

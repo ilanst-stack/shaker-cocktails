@@ -1,19 +1,13 @@
 // זיהוי בקבוקים ומצרכים מתמונה בעזרת Gemini (Firebase AI Logic)
-import { getAI, getGenerativeModel, GoogleAIBackend, Schema } from 'firebase/ai';
-import { app } from '../firebase.js';
-import { geminiModel } from '../firebase-config.js';
+import { Schema } from 'firebase/ai';
+import { askJson } from './ai.js';
 import { GROUPS, getGroup, unitOf } from './ingredients.js';
 
-let model = null;
-function getModel() {
-  if (model) return model;
-  const ai = getAI(app, { backend: new GoogleAIBackend() });
+let schema = null;
+function getSchema() {
+  if (schema) return schema;
   const keys = [...GROUPS.filter((g) => !g.assumed).map((g) => g.key), 'other'];
-  model = getGenerativeModel(ai, {
-    model: geminiModel,
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: Schema.object({
+  schema = Schema.object({
         properties: {
           items: Schema.array({
             items: Schema.object({
@@ -28,10 +22,8 @@ function getModel() {
             }),
           }),
         },
-      }),
-    },
-  });
-  return model;
+      });
+  return schema;
 }
 
 const PROMPT = `You are helping fill a home-bar inventory for a cocktail app.
@@ -47,9 +39,7 @@ Ignore items that are not drink ingredients. If two identical bottles appear, us
 export async function identifyBottles(dataUrl) {
   const [meta, b64] = dataUrl.split(',');
   const mimeType = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
-  const res = await getModel().generateContent([PROMPT, { inlineData: { data: b64, mimeType } }]);
-  let parsed;
-  try { parsed = JSON.parse(res.response.text()); } catch { throw new Error('לא הצלחתי להבין את התשובה מהזיהוי'); }
+  const parsed = await askJson('vision', getSchema(), [PROMPT, { inlineData: { data: b64, mimeType } }]);
   const merged = new Map();
   for (const it of parsed.items || []) {
     const g = getGroup(it.key);

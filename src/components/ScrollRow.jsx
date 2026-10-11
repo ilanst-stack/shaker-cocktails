@@ -58,9 +58,17 @@ export default function ScrollRow({ label, children, inset = true, className = '
 
   return (
     <div className={`scrollrow ${inset ? 'inset' : ''} ${className}`}>
-      {edge.start && <button className="sr-arrow sr-start" aria-label="גלילה להתחלה" onClick={() => go(false)}>›</button>}
+      {edge.start && (
+        <button className="sr-arrow sr-start" aria-label="גלילה ימינה" onClick={() => go(false)}>
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+      )}
       <nav ref={ref} className="chips" aria-label={label} onScroll={update}>{children}</nav>
-      {edge.end && <button className="sr-arrow sr-end" aria-label="גלילה לעוד" onClick={() => go(true)}>‹</button>}
+      {edge.end && (
+        <button className="sr-arrow sr-end" aria-label="גלילה שמאלה לעוד" onClick={() => go(true)}>
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+      )}
     </div>
   );
 }
