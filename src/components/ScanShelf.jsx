@@ -64,7 +64,7 @@ export default function ScanShelf({ inventory, setInventory }) {
           <IconCamera /> {state === 'busy' ? 'מזהה…' : 'צילום'}
         </button>
       </div>
-      {!aiReady && <p style={{ fontSize: 13, margin: '8px 0 0', fontWeight: 700 }}>הזיהוי עדיין לא הופעל (חסר מפתח reCAPTCHA בהגדרות).</p>}
+      {!aiReady && <p style={{ fontSize: 13, margin: '8px 0 0', fontWeight: 700 }}>הזיהוי עדיין לא הופעל — מחכה להגדרת Fraud Defense ב-Firebase.</p>}
       {state === 'error' && <p role="alert" style={{ fontWeight: 700, margin: '8px 0 0' }}>{err}</p>}
 
       {state === 'review' && (

@@ -3,18 +3,18 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged,
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
-import { firebaseConfig, recaptchaSiteKey } from './firebase-config.js';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
+import { firebaseConfig, recaptchaEnterpriseKey } from './firebase-config.js';
 
 export const isConfigured = !String(firebaseConfig.apiKey).includes('PASTE');
 
 export const app = isConfigured ? initializeApp(firebaseConfig) : null;
 
 // App Check: מוכיח ל-Firebase שהבקשות מגיעות מהאפליקציה שלנו (חובה לשימוש ב-Gemini)
-export const aiReady = !!(app && recaptchaSiteKey);
+export const aiReady = !!(app && recaptchaEnterpriseKey);
 if (aiReady) {
   if (location.hostname === 'localhost') self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-  initializeAppCheck(app, { provider: new ReCaptchaV3Provider(recaptchaSiteKey), isTokenAutoRefreshEnabled: true });
+  initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(recaptchaEnterpriseKey), isTokenAutoRefreshEnabled: true });
 }
 export const auth = app ? getAuth(app) : null;
 // מטמון מקומי: האפליקציה ממשיכה לעבוד גם בלי קליטה, ומסתנכרנת כשחוזרים לרשת

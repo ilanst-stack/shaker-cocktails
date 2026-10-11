@@ -135,14 +135,16 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
               <button className={`btn small ${tasted ? 'black' : ''}`} aria-pressed={tasted} onClick={() => onTasted(!tasted)}>{tasted ? '✔ טעמתי' : 'טעמתי?'}</button>
               <div className="stars" role="group" aria-label="דירוג">
-                <button className="zero-btn" aria-label="0 כוכבים — לא אהבתי בכלל" title="0 — לא אהבתי בכלל" onClick={() => onRate(0)} aria-pressed={rating === 0}>0</button>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button key={n} aria-label={`${n} כוכבים`} aria-pressed={rating === n} onClick={() => onRate(n)}><Star on={rating != null && n <= rating} size={30} fill="#E8322B" /></button>
                 ))}
               </div>
             </div>
-            <div style={{ fontWeight: 700, fontSize: 14, marginTop: 6 }} role="status">
-              {rating == null ? 'עוד לא דירגת · 0 = לא אהבתי בכלל, 5 = מושלם' : rating === 0 ? 'דירגת 0 — לא אהבת בכלל' : `דירגת ${rating} מתוך 5`}
+            <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+              <span style={{ fontWeight: 700, fontSize: 14 }} role="status">
+                {rating == null ? 'עוד לא דירגת' : rating === 0 ? 'דירגת 0 — לא אהבת בכלל' : `דירגת ${rating} מתוך 5`}
+              </span>
+              <button className="zero-btn" aria-pressed={rating === 0} onClick={() => onRate(0)}>✗ לא אהבתי בכלל (0)</button>
             </div>
             <div style={{ marginTop: 14 }}>
               {photo ? (

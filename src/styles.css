@@ -132,8 +132,8 @@ button { cursor: pointer; }
 .step-cols p { margin: 0; font-size: 14px; line-height: 1.4; }
 .step-cols .he { font-weight: 700; }
 .step-cols .en { text-align: left; color: #444; border-right: 2px dashed #bbb; padding-right: 10px; }
-.zero-btn { width: 40px !important; height: 40px !important; border: 2.5px solid var(--ink) !important; border-radius: 50%; font: 700 20px var(--display); background: #fff !important; margin-left: 4px; }
-.zero-btn[aria-pressed='true'] { background: var(--ink) !important; color: var(--yellow); }
+.zero-btn { min-height: 36px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font: 700 13px var(--body); padding: 0 12px; }
+.zero-btn[aria-pressed='true'] { background: var(--ink); color: var(--yellow); }
 .frames { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .frame { background: #fff; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 .frame .num { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--yellow); display: flex; align-items: center; justify-content: center; font: 700 22px var(--display); }
