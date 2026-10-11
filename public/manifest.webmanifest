@@ -1,0 +1,11 @@
+{
+  "name": "שייקר! קוקטיילים",
+  "short_name": "שייקר!",
+  "start_url": "/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#FFE14D",
+  "theme_color": "#FFE14D",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

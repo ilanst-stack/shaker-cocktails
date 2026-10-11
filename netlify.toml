@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# מתכוני הקוקטיילים נטענים דרך השרת של Netlify (בלי בעיות CORS)
+[[redirects]]
+  from = "/api/cocktaildb/*"
+  to = "https://www.thecocktaildb.com/api/json/v1/1/:splat"
+  status = 200
+  force = true
+
+# כל כתובת אחרת פותחת את האפליקציה
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
