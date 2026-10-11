@@ -73,7 +73,7 @@ button { cursor: pointer; }
 .sortbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #fff; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 6px 10px; margin-top: 4px; }
 .sortbar label { font: 700 22px var(--display); }
 .sortbar select { flex: 1; min-width: 150px; min-height: 40px; border: 2.5px solid var(--ink); background: var(--yellow); font: 700 15px var(--body); padding: 0 8px; border-radius: 0; }
-.dir-btn { min-height: 40px; border: 2.5px solid var(--ink); background: var(--ink); color: var(--yellow); font: 700 14px var(--body); padding: 0 10px; }
+.dir-btn { min-height: 40px; border: 2.5px solid var(--ink); background: rgba(255, 225, 77, 0.55); color: var(--ink); font: 700 14px var(--body); padding: 0 10px; }
 .stat { display: inline-flex; gap: 3px; align-items: center; }
 .stat.hl { background: var(--yellow); border: 2px solid var(--ink); padding: 0 5px; border-radius: 4px; }
 
@@ -174,11 +174,11 @@ button { cursor: pointer; }
 .err-details { margin-top: 6px; font-size: 12px; font-weight: 400; }
 .err-details summary { cursor: pointer; text-decoration: underline; }
 .err-details code { display: block; margin-top: 4px; padding: 6px; background: #f3f3f3; border: 1px dashed #999; white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; font-size: 11px; }
-.scan-panel { margin-top: 16px; background-color: #fff; background-image: radial-gradient(rgba(232,50,43,0.22) 1.6px, transparent 1.7px); background-size: 10px 10px; }
+.scan-panel { margin-top: 16px; background-color: #fff; background-image: radial-gradient(rgba(232,50,43,0.09) 1.6px, transparent 1.7px); background-size: 10px 10px; }
 .scan-burst { width: 58px; height: 58px; flex-shrink: 0; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; }
 .scan-err { font-weight: 700; margin-top: 10px; background: #FFF4C2; border: 2px solid var(--ink); padding: 6px 10px; }
-.house-check { display: inline-flex; align-items: center; gap: 6px; font: 700 14px var(--body); min-height: 40px; padding: 0 8px; border: 2.5px dashed #2E7D32; background: #E8F5E9; }
-.house-check input { width: 20px; height: 20px; accent-color: #2E7D32; }
+.house-check { display: inline-flex; align-items: center; gap: 6px; font: 700 14px var(--body); min-height: 40px; padding: 0 8px; border: 2.5px dashed var(--ink); background: rgba(255, 225, 77, 0.22); }
+.house-check input { width: 20px; height: 20px; accent-color: var(--ink); }
 .tag.house { background: #2E7D32; color: #fff; }
 .house-thumb { display: flex; align-items: center; justify-content: center; background: #E8F5E9 !important; }
 .form label { display: block; font-weight: 700; font-size: 14px; margin: 10px 0 4px; }
