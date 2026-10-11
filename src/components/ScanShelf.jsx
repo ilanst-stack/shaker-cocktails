@@ -15,10 +15,12 @@ export default function ScanShelf({ inventory, setInventory }) {
   const [img, setImg] = useState(null);
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState('');
+  const [source, setSource] = useState('camera'); // camera | gallery
   const have = new Map(inventory.map((i) => [i.key, i]));
 
-  async function onFile(ev) {
+  async function onFile(ev, src) {
     const f = ev.target.files?.[0];
+    setSource(src);
     ev.target.value = '';
     if (!f) return;
     setState('busy'); setErr('');
@@ -29,10 +31,15 @@ export default function ScanShelf({ inventory, setInventory }) {
       const found = await identifyBottles(data);
       setRows(found.map((r) => ({ ...r, on: !have.has(r.key) && r.confidence >= 0.5, exists: have.has(r.key) })));
       setState(found.length ? 'review' : 'error');
-      if (!found.length) setErr('לא זיהיתי משקאות בתמונה. נסה צילום קרוב יותר, עם תוויות גלויות.');
+      if (!found.length) setErr(src === 'camera'
+        ? 'לא זיהיתי משקאות בתמונה. נסה לצלם שוב — קרוב יותר, עם התווית מול המצלמה.'
+        : 'לא זיהיתי משקאות בתמונה. נסה תמונה אחרת, שבה התוויות ברורות.');
     } catch (e) {
-      console.error(e);
-      setErr(`הזיהוי נכשל: ${e.message || e}`);
+      console.error(e); // הפרטים הטכניים נשארים רק בקונסול
+      const { isBusyError } = await import('../data/ai.js');
+      setErr(isBusyError(e)
+        ? 'שירות הזיהוי עמוס כרגע. נסה שוב בעוד דקה.'
+        : src === 'camera' ? 'הזיהוי נכשל. נסה לצלם שוב, או צילום נוסף מזווית אחרת.' : 'הזיהוי נכשל. נסה תמונה אחרת מהגלריה.');
       setState('error');
     }
   }
@@ -58,18 +65,18 @@ export default function ScanShelf({ inventory, setInventory }) {
     <div className="panel" style={{ marginTop: 16, background: '#1FA3D9', color: '#fff' }}>
       <div style={{ font: '700 28px/1 var(--display)' }}>צלם את הבר!</div>
       <div style={{ fontSize: 13, marginTop: 4 }}>צילום של המדף או של בקבוק — אני אזהה ואציע להוסיף</div>
-      <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={onFile} />
-      <input ref={galleryRef} type="file" accept="image/*" hidden onChange={onFile} />
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(ev) => onFile(ev, 'camera')} />
+      <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(ev) => onFile(ev, 'gallery')} />
       <div className="row" style={{ gap: 10, marginTop: 10 }}>
-        <button className="btn red small" style={{ flex: 1 }} disabled={!aiReady || state === 'busy'} onClick={() => fileRef.current?.click()}>
-          <IconCamera /> {state === 'busy' ? 'מזהה…' : 'צילום'}
+        <button className="btn small" style={{ flex: 1 }} disabled={!aiReady || state === 'busy'} onClick={() => fileRef.current?.click()}>
+          <IconCamera /> {state === 'busy' && source === 'camera' ? 'מזהה…' : 'צילום'}
         </button>
         <button className="btn small" style={{ flex: 1 }} disabled={!aiReady || state === 'busy'} onClick={() => galleryRef.current?.click()}>
-          <IconGallery /> מהגלריה
+          <IconGallery /> {state === 'busy' && source === 'gallery' ? 'מזהה…' : 'מהגלריה'}
         </button>
       </div>
       {!aiReady && <p style={{ fontSize: 13, margin: '8px 0 0', fontWeight: 700 }}>הזיהוי עדיין לא הופעל — מחכה להגדרת Fraud Defense ב-Firebase.</p>}
-      {state === 'error' && <p role="alert" style={{ fontWeight: 700, margin: '8px 0 0' }}>{err}</p>}
+      {state === 'error' && <p role="alert" style={{ fontWeight: 700, margin: '10px 0 0', background: '#fff', color: '#111', border: '2px solid #111', padding: '6px 10px' }}>{err}</p>}
 
       {state === 'review' && (
         <div style={{ marginTop: 12, background: '#fff', color: '#111', border: '3px solid #111', padding: 10 }}>

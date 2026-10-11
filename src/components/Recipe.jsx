@@ -122,7 +122,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             ))}
           </ol>
           {trState === 'off' && <p className="muted" style={{ fontSize: 12, margin: '6px 0 0' }}>התרגום לעברית יופעל אחרי הגדרת Gemini.</p>}
-          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>התרגום לא הצליח כרגע. <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button><br /><small className="muted" dir="ltr" style={{ fontWeight: 400 }}>{trErr}</small></p>}
+          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>{/busy|demand|50\d|429/i.test(trErr) ? 'שירות התרגום עמוס כרגע.' : 'התרגום לא הצליח כרגע.'} <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button></p>}
 
           <div className="serve">
             <span>כוס: {GLASS_HE[gType]}</span>

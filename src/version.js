@@ -1,2 +1,2 @@
 // מספר גרסה — עולה ב-0.01 בכל עדכון
-export const VERSION = '1.03';
+export const VERSION = '1.04';

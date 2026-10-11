@@ -36,7 +36,7 @@ Do NOT add numbering. Keep numbers and units. Use common Israeli bar terms (שי
 Input: ${JSON.stringify(steps)}`;
 
   let lastErr;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 1; attempt++) {
     try {
       const res = await askJson('translate', schema, [prompt]);
       if (!Array.isArray(res.steps) || !res.steps.length) throw new Error('תרגום ריק');

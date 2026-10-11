@@ -33,8 +33,8 @@ export const GROUPS = [
   { key: 'raspberry liqueur', he: 'ליקר פטל / קסיס', kind: 'liqueur', color: '#9E1B4F', aliases: ['chambord raspberry liqueur', 'raspberry liqueur', 'creme de cassis', 'black sambuca'] },
   { key: 'cacao liqueur', he: 'ליקר שוקולד', kind: 'liqueur', color: '#5C3A21', aliases: ['creme de cacao', 'white creme de cacao', 'chocolate liqueur', 'godiva liqueur'] },
   { key: 'mint liqueur', he: 'ליקר מנטה', kind: 'liqueur', color: '#5BC27A', aliases: ['creme de menthe', 'green creme de menthe', 'white creme de menthe', 'peppermint schnapps'] },
-  { key: 'herbal liqueur', he: 'ליקר צמחים (יגרמייסטר/שרטרז)', kind: 'liqueur', color: '#4A3B1A', aliases: ['jägermeister', 'jagermeister', 'green chartreuse', 'yellow chartreuse', 'chartreuse', 'benedictine', 'galliano', 'drambuie', 'strega'] },
-  { key: 'other liqueur', he: 'ליקר אגוזים/דובדבן', kind: 'liqueur', color: '#8C4A2F', aliases: ['frangelico', 'maraschino liqueur', 'cherry brandy', 'cherry liqueur', 'apricot brandy', 'sloe gin', 'cherry heering', 'kirschwasser', 'banana liqueur', 'creme de banane'] },
+  { key: 'herbal liqueur', he: 'ליקר צמחים (יגרמייסטר / שרטרז)', kind: 'liqueur', color: '#4A3B1A', aliases: ['jägermeister', 'jagermeister', 'green chartreuse', 'yellow chartreuse', 'chartreuse', 'benedictine', 'galliano', 'drambuie', 'strega'] },
+  { key: 'other liqueur', he: 'ליקר אגוזים / דובדבן', kind: 'liqueur', color: '#8C4A2F', aliases: ['frangelico', 'maraschino liqueur', 'cherry brandy', 'cherry liqueur', 'apricot brandy', 'sloe gin', 'cherry heering', 'kirschwasser', 'banana liqueur', 'creme de banane'] },
   { key: 'angostura', he: 'ביטרס (אנגוסטורה)', kind: 'liqueur', color: '#8B2E16', aliases: ['angostura bitters', 'bitters', 'orange bitters', 'peychaud bitters', 'aromatic bitters'] },
 
   // ---- יין ובירה
@@ -50,7 +50,7 @@ export const GROUPS = [
   { key: 'lime', he: 'ליים (פרי)', kind: 'fresh', color: '#B6E35C', unlimited: true, aliases: ['lime', 'limes', 'lime peel', 'lime wedge', 'lime slice', 'juice of lime', 'lime twist', 'lime zest'] },
   { key: 'lime juice', he: 'מיץ ליים', kind: 'juice', color: '#B6E35C', aliases: ['lime juice', 'fresh lime juice', 'rose\'s lime juice', 'lime cordial'] },
   { key: 'orange juice', he: 'מיץ תפוזים', kind: 'juice', color: '#FF9F1C', aliases: ['orange juice', 'fresh orange juice'] },
-  { key: 'orange', he: 'תפוז (פרי/קליפה)', kind: 'fresh', color: '#FF9F1C', aliases: ['orange', 'orange peel', 'orange spiral', 'orange slice', 'orange wedge', 'blood orange', 'orange zest'] },
+  { key: 'orange', he: 'תפוז (פרי / קליפה)', kind: 'fresh', color: '#FF9F1C', aliases: ['orange', 'orange peel', 'orange spiral', 'orange slice', 'orange wedge', 'blood orange', 'orange zest'] },
   { key: 'pineapple juice', he: 'מיץ אננס', kind: 'juice', color: '#FFD84D', aliases: ['pineapple juice', 'pineapple', 'pineapple chunks'] },
   { key: 'cranberry juice', he: 'מיץ חמוציות', kind: 'juice', color: '#D7263D', aliases: ['cranberry juice', 'cranberries'] },
   { key: 'grapefruit juice', he: 'מיץ אשכוליות', kind: 'juice', color: '#FF7F7F', aliases: ['grapefruit juice', 'pink grapefruit juice', 'grapefruit'] },
@@ -145,9 +145,12 @@ export function defaultAmount(key, kind) {
 export function migrateInventory(inv) {
   return (inv || []).map((it) => {
     const unit = unitOf(it.key);
-    if (it.unit === unit) return it;
-    const amount = it.unlimited ? null : unit === 'ml' ? it.amount : defaultAmount(it.key, it.kind);
-    return { ...it, unit, amount };
+    const g = byKey.get(it.key);
+    // השם תמיד לפי המילון העדכני (למשל "לימון / מיץ לימון" → "לימון (פרי)")
+    const named = g && it.he !== g.he ? { ...it, he: g.he, kind: g.kind } : it;
+    if (named.unit === unit) return named;
+    const amount = named.unlimited ? null : unit === 'ml' ? named.amount : defaultAmount(named.key, named.kind);
+    return { ...named, unit, amount };
   });
 }
 
