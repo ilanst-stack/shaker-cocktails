@@ -113,8 +113,12 @@ button { cursor: pointer; }
 .suggest button:hover, .suggest button:focus { background: var(--yellow); }
 
 /* מתכון */
-.recipe-hero { position: relative; height: 320px; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); overflow: hidden; }
-.callouts { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; max-width: 48%; }
+.recipe-hero { position: relative; min-height: 330px; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); overflow: hidden; padding: 12px; display: flex; }
+.callouts { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; width: 48%; }
+.recipe-hero.compact .callouts { gap: 5px; }
+.recipe-hero.compact .callout { padding: 2px 8px; }
+.recipe-hero.compact .callout b { font-size: 21px; }
+.recipe-hero.compact .callout span { font-size: 11px; }
 .callout { background: #fff; border: 3px solid var(--ink); padding: 4px 10px; box-shadow: 3px 3px 0 var(--ink); }
 .callout:nth-child(odd) { transform: rotate(1.5deg); }
 .callout:nth-child(even) { transform: rotate(-2deg); }
@@ -154,3 +158,5 @@ button { cursor: pointer; }
 .progress div { height: 100%; background: var(--red); transition: width .2s; }
 .empty { text-align: center; padding: 24px 10px; }
 .toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) rotate(-2deg); background: var(--ink); color: var(--yellow); padding: 8px 18px; font: 700 22px var(--display); z-index: 60; border: 3px solid var(--yellow); }
+
+.version { font: 700 12px var(--body); background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 1px 8px; }

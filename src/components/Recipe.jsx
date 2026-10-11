@@ -26,7 +26,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
   useEffect(() => { window.scrollTo(0, 0); }, [d.id]);
 
   const shown = d.ingredients.filter((i) => !getGroup(i.group)?.assumed);
-  const callouts = shown.slice(0, 5);
+  const callouts = shown;
   const missingSet = new Set(e.missing.map((i) => i.name));
   const steps = splitSteps(d.instructions);
 
@@ -34,6 +34,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
   const [heSteps, setHeSteps] = useState(null);
   const [trState, setTrState] = useState(aiReady ? 'busy' : 'off');
   const [trTry, setTrTry] = useState(0);
+  const [trErr, setTrErr] = useState('');
   useEffect(() => {
     if (!aiReady) return undefined;
     let on = true;
@@ -41,7 +42,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
     import('../data/translate.js')
       .then(({ translateSteps }) => translateSteps(uid, d.id, steps))
       .then((he) => { if (on) { setHeSteps(he); setTrState('done'); } })
-      .catch((err) => { console.error(err); if (on) setTrState('error'); });
+      .catch((err) => { console.error(err); if (on) { setTrState('error'); setTrErr(String(err?.code || err?.message || err).slice(0, 140)); } });
     return () => { on = false; };
   }, [d.id, trTry]); // eslint-disable-line react-hooks/exhaustive-deps
   const gType = glassType(d.glass);
@@ -75,7 +76,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
         </header>
 
         <div style={{ padding: '0 16px' }}>
-          <section className="recipe-hero dots-cyan" aria-label="מצרכים וכמויות">
+          <section className={`recipe-hero dots-cyan ${shown.length > 4 ? 'compact' : ''}`} aria-label="מצרכים וכמויות">
             <div className="glass-wrap"><GlassArt drink={d} width={170} /></div>
             <div className="callouts">
               {callouts.map((i, k) => (
@@ -92,7 +93,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             </div>
           </section>
 
-          {(shown.length > 5 || !e.ready || e.subs.length > 0) && (
+          {(shown.length > 4 || !e.ready || e.subs.length > 0) && (
             <div className="panel" style={{ marginTop: 16 }}>
               <div style={{ font: '700 24px var(--display)' }}>כל המצרכים</div>
               <ul style={{ margin: '6px 0 0', paddingInlineStart: 18, lineHeight: 1.7 }}>
@@ -120,7 +121,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             ))}
           </ol>
           {trState === 'off' && <p className="muted" style={{ fontSize: 12, margin: '6px 0 0' }}>התרגום לעברית יופעל אחרי הגדרת Gemini.</p>}
-          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>התרגום לא הצליח כרגע. <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button></p>}
+          {trState === 'error' && <p style={{ fontSize: 13, margin: '6px 0 0', fontWeight: 700 }}>התרגום לא הצליח כרגע. <button className="btn small" style={{ minHeight: 34, fontSize: 18 }} onClick={() => setTrTry(trTry + 1)}>לנסות שוב</button><br /><small className="muted" dir="ltr" style={{ fontWeight: 400 }}>{trErr}</small></p>}
 
           <div className="serve">
             <span>כוס: {GLASS_HE[gType]}</span>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { isConfigured, watchUser, logout } from './firebase.js';
 import { useUserData } from './data/userData.js';
+import { VERSION } from './version.js';
 import { loadDrinks, allIngredientNames } from './data/cocktails.js';
 import { buildIndex } from './data/match.js';
 import Login from './components/Login.jsx';
@@ -88,7 +89,10 @@ function Main({ user }) {
   return (
     <div className="app dots">
       <header className="topbar">
-        <div className="logo">שייקר!</div>
+        <div className="row" style={{ gap: 10, alignItems: 'flex-end' }}>
+          <div className="logo">שייקר!</div>
+          <span className="version" dir="ltr">v{VERSION}</span>
+        </div>
         <button className="icon-btn" style={{ background: '#1FA3D9', color: '#fff', font: '700 24px var(--display)' }}
           aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => { if (confirm('להתנתק?')) logout(); }}>
           {user.photoURL ? <img src={user.photoURL} alt="" width="38" height="38" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" /> : (user.displayName || '?')[0]}
