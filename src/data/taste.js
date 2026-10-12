@@ -1,5 +1,8 @@
-// לימוד הטעם: מכל דירוג (0–5) לומדים אילו מאפיינים אהבת (בסיס, משפחת טעם, מצרכים, חוזק)
-// וכל קוקטייל שלא טעמת מקבל ציון לפי הדמיון למה שאהבת.
+// לימוד הטעם: מכל דירוג (0–5) ומכל מועדף לומדים אילו מאפיינים אהבת (בסיס, משפחת טעם, מצרכים, חוזק)
+// וכל קוקטייל שלא דירגת ולא במועדפים מקבל ציון לפי הדמיון למה שאהבת.
+// אות לכל משקה: דירוג − 2.5 (0 → −2.5, 5 → +2.5); מועדף בלי דירוג = כמו 4 (+1.5); מועדף עם דירוג = +0.5 בונוס.
+// ערך מאפיין = סכום האותות / (מספר המשקאות שבהם הופיע + 1) — כך מאפיין שחוזר בהרבה משקאות שאהבת
+// חזק יותר ממאפיין של משקה בודד, גם אם המשקה הבודד קיבל 5.
 import { strengthOf } from './match.js';
 
 function features(entry) {
@@ -13,17 +16,23 @@ function features(entry) {
 
 const WEIGHT = { base: 1.2, fam: 1, ing: 0.5, str: 0.8 };
 
-export function learnProfile(index, ratings) {
+export function signals(ratings, favorites) {
+  const sig = {};
+  for (const [id, r] of Object.entries(ratings || {})) if (typeof r === 'number') sig[id] = r - 2.5;
+  for (const id of favorites || []) sig[id] = sig[id] != null ? sig[id] + 0.5 : 1.5;
+  return sig;
+}
+
+export function learnProfile(index, ratings, favorites) {
   const sum = new Map(), cnt = new Map();
   const byId = new Map(index.map((e) => [e.drink.id, e]));
-  for (const [id, r] of Object.entries(ratings || {})) {
+  for (const [id, c] of Object.entries(signals(ratings, favorites))) {
     const e = byId.get(id);
-    if (!e || typeof r !== 'number') continue;
-    const c = r - 2.5; // 0–2 = לא אהבתי, 3–5 = אהבתי
+    if (!e) continue;
     for (const f of features(e)) { sum.set(f, (sum.get(f) || 0) + c); cnt.set(f, (cnt.get(f) || 0) + 1); }
   }
   const profile = new Map();
-  for (const [f, s] of sum) profile.set(f, s / cnt.get(f));
+  for (const [f, s] of sum) profile.set(f, s / (cnt.get(f) + 1));
   return profile;
 }
 
@@ -36,12 +45,12 @@ export function scoreEntry(entry, profile) {
   return score;
 }
 
-export function recommend(index, ratings, { limit = 20, maxGap = 1 } = {}) {
-  const rated = Object.keys(ratings || {}).filter((k) => typeof ratings[k] === 'number');
-  if (rated.length < 2) return { needMore: 2 - rated.length, items: [] };
-  const profile = learnProfile(index, ratings);
+export function recommend(index, ratings, { limit = 20, maxGap = 1, favorites = [] } = {}) {
+  const known = new Set(Object.keys(signals(ratings, favorites)));
+  if (known.size < 2) return { needMore: 2 - known.size, items: [] };
+  const profile = learnProfile(index, ratings, favorites);
   const items = index
-    .filter((e) => !rated.includes(e.drink.id) && e.gap <= maxGap)
+    .filter((e) => !known.has(e.drink.id) && e.gap <= maxGap)
     .map((e) => ({ ...e, score: scoreEntry(e, profile) - e.gap * 0.8 }))
     .filter((e) => e.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -57,7 +66,7 @@ const LABELS = {
 
 function topLikes(profile) {
   return [...profile.entries()]
-    .filter(([f, v]) => v > 0.5 && LABELS[f.split(':')[0]])
+    .filter(([f, v]) => v > 0.4 && LABELS[f.split(':')[0]])
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
     .map(([f]) => { const [t, k] = f.split(':'); return LABELS[t][k]; })

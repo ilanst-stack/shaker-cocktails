@@ -33,7 +33,7 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
     const seen = new Set();
     for (const g of GROUPS) {
       if (g.assumed || have.has(g.key) || (kids && isAlcoholKey(g.key))) continue;
-      if (g.he.includes(q.trim()) || g.key.includes(t) || g.aliases.some((a) => a.includes(t))) { out.push({ key: g.key, label: g.he, sub: g.aliases[0] }); seen.add(g.key); }
+      if (norm(g.he).includes(t) || g.key.includes(t) || g.aliases.some((a) => norm(a).includes(t))) { out.push({ key: g.key, label: g.he, sub: g.aliases[0] }); seen.add(g.key); }
     }
     for (const n of ingredientNames) {
       const k = groupOf(n)?.key || norm(n);

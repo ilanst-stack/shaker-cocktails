@@ -58,7 +58,20 @@ export const GROUPS = [
   { key: 'tomato juice', he: 'מיץ עגבניות', kind: 'juice', color: '#C1272D', aliases: ['tomato juice', 'clamato juice'] },
   { key: 'passion fruit', he: 'מיץ / פרי פסיפלורה', kind: 'juice', color: '#F7B32B', aliases: ['passion fruit juice', 'passion fruit', 'maracuja juice', 'passion fruit nectar'] },
   { key: 'passion fruit syrup', he: 'סירופ פסיפלורה', kind: 'sweet', color: '#F2A93B', aliases: ['passion fruit syrup', 'maracuja syrup'] },
-  { key: 'flavored syrup', he: 'סירופ בטעמים (אורז׳ה, פטל וכו׳)', kind: 'sweet', color: '#E8A0BF', aliases: ['orgeat syrup', 'orgeat', 'falernum', 'raspberry syrup', 'strawberry syrup', 'almond syrup', 'cinnamon syrup', 'elderflower cordial', 'elderflower syrup', 'peach syrup', 'blackberry syrup'] },
+  { key: 'orgeat', he: 'סירופ אורז׳ה (שקדים)', kind: 'sweet', color: '#F3E5C3', aliases: ['orgeat syrup', 'orgeat', 'almond syrup', 'אורזה', 'סירופ שקדים'] },
+  { key: 'elderflower syrup', he: 'סירופ סמבוק (Elderflower)', kind: 'sweet', color: '#F1EBC2', aliases: ['elderflower cordial', 'elderflower syrup', 'elderflower', 'elder flower syrup', 'סמבוק', 'סירופ אלדרפלאואר'] },
+  { key: 'raspberry syrup', he: 'סירופ פטל', kind: 'sweet', color: '#C2185B', aliases: ['raspberry syrup', 'פטל'] },
+  { key: 'strawberry syrup', he: 'סירופ תות', kind: 'sweet', color: '#E53950', aliases: ['strawberry syrup'] },
+  { key: 'blackberry syrup', he: 'סירופ פטל שחור / אוכמניות', kind: 'sweet', color: '#4A1942', aliases: ['blackberry syrup', 'blueberry syrup', 'cassis syrup'] },
+  { key: 'peach syrup', he: 'סירופ אפרסק', kind: 'sweet', color: '#F7A072', aliases: ['peach syrup'] },
+  { key: 'cinnamon syrup', he: 'סירופ קינמון', kind: 'sweet', color: '#A0522D', aliases: ['cinnamon syrup'] },
+  { key: 'falernum', he: 'פלרנום (סירופ תבלינים)', kind: 'sweet', color: '#E9D8A6', aliases: ['falernum', 'velvet falernum'] },
+  { key: 'hazelnut syrup', he: 'סירופ אגוזי לוז', kind: 'sweet', color: '#8B5A2B', aliases: ['hazelnut syrup'] },
+  { key: 'caramel syrup', he: 'סירופ קרמל', kind: 'sweet', color: '#C68E17', aliases: ['caramel syrup', 'caramel', 'salted caramel syrup'] },
+  { key: 'lavender syrup', he: 'סירופ לבנדר', kind: 'sweet', color: '#B497D6', aliases: ['lavender syrup'] },
+  { key: 'rose syrup', he: 'סירופ ורדים', kind: 'sweet', color: '#F4A6B7', aliases: ['rose syrup', 'rose water', 'מי ורדים'] },
+  { key: 'mango syrup', he: 'סירופ מנגו', kind: 'sweet', color: '#FFB627', aliases: ['mango syrup'] },
+  { key: 'flavored syrup', he: 'סירופ בטעם אחר', kind: 'sweet', color: '#E8A0BF', aliases: ['flavored syrup'] },
   { key: 'mango', he: 'מנגו', kind: 'juice', color: '#FFB627', aliases: ['mango', 'mango juice', 'mango nectar'] },
   { key: 'strawberries', he: 'תותים', kind: 'fresh', color: '#E63946', aliases: ['strawberries', 'strawberry', 'frozen strawberries', 'strawberry schnapps'] },
   { key: 'banana', he: 'בננה', kind: 'fresh', color: '#FBE37D', aliases: ['banana'] },
@@ -154,22 +167,24 @@ export function migrateInventory(inv) {
   });
 }
 
+// גרש/גרשיים בכל הצורות (' ’ ` ׳) נחשבים אותו דבר: ג'ין = ג׳ין
+export const norm = (s) => String(s || '').trim().toLowerCase().replace(/['’‘`´]/g, '׳').replace(/["“”]/g, '״').replace(/\s+/g, ' ');
+
 const byKey = new Map(GROUPS.map((g) => [g.key, g]));
 const byAlias = new Map();
 for (const g of GROUPS) {
-  byAlias.set(g.key, g);
-  for (const a of g.aliases) byAlias.set(a, g);
+  byAlias.set(norm(g.key), g);
+  for (const a of g.aliases) byAlias.set(norm(a), g);
 }
 // גם שמות בעברית (למתכוני בית): "ליקר צמחים (יגרמייסטר / שרטרז)" → "ליקר צמחים", "יגרמייסטר", "שרטרז"
 for (const g of GROUPS) {
-  const he = g.he.trim().toLowerCase();
+  const he = norm(g.he);
   if (!byAlias.has(he)) byAlias.set(he, g);
   for (const part of he.replace(/[()]/g, ' / ').split('/').map((x) => x.trim()).filter((x) => x.length > 1)) {
     if (!byAlias.has(part)) byAlias.set(part, g);
   }
 }
 
-export const norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
 // מוצא את הקבוצה של מצרך מהמאגר (לפי שם מדויק, ואם לא — לפי מילת מפתח)
 export function groupOf(name) {
