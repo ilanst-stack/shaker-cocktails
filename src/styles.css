@@ -263,3 +263,10 @@ button, [role='button'], [role='checkbox'], .chip, .seg, .tabbar, .inv-cat-h, .g
 .stepper output { min-width: 80px; font-variant-numeric: tabular-nums; }
 /* חלון אישור כללי */
 .confirm-text { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+/* v1.19: גרירה — הפריט המקורי מוסתר, וקוביה ריקה מסמנת איפה ינחת */
+.inv-item.dragging { display: none; }
+.drop-slot { flex-shrink: 0; border: 3px dashed var(--red-soft); background: rgba(224, 74, 65, .12); }
+/* חלון במרכז המסך, רקע צהוב עם נקודות כמו הרקע */
+.modal-back.center { align-items: center; }
+.modal.yellow { background-color: var(--yellow); background-image: radial-gradient(var(--yellow-dot) 1.6px, transparent 1.7px); background-size: 11px 11px; box-shadow: 6px 6px 0 var(--ink); margin-bottom: 0; }
+.drag-ghost { opacity: .92; }

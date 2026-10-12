@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { GROUPS, groupOf, norm, getGroup, unitOf, defaultAmount, UNIT_HE } from '../data/ingredients.js';
 import { searchBrands, isReadyKey } from '../data/brands.js';
 import { KIND_ORDER, KIND_HE, newId, catOf, isMovable, isLow, isOut, moveWithinCat } from '../data/inventory.js';
@@ -114,7 +114,11 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
   function onGripDown(e, it) {
     e.preventDefault();
     const row = e.currentTarget.closest('[data-inv-id]').getBoundingClientRect();
-    const d = { id: it.id, cat: catOf(it), label: it.brand ? `${typeName(it)} · ${it.brand}` : typeName(it), x: row.left, y: e.clientY, dy: e.clientY - row.top, w: row.width, h: row.height, overId: null, before: true };
+    // הקוביה הריקה מתחילה במקום של הפריט עצמו
+    const same = inventory.filter((x) => catOf(x) === catOf(it));
+    const i = same.findIndex((x) => x.id === it.id);
+    const start = same[i + 1] ? { overId: same[i + 1].id, before: true } : same[i - 1] ? { overId: same[i - 1].id, before: false } : { overId: null, before: true };
+    const d = { id: it.id, cat: catOf(it), label: it.brand ? `${typeName(it)} · ${it.brand}` : typeName(it), x: row.left, y: e.clientY, dy: e.clientY - row.top, w: row.width, h: row.height, ...start };
     dragRef.current = d; setDrag(d);
     e.currentTarget.setPointerCapture?.(e.pointerId);
     navigator.vibrate?.(15);
@@ -126,12 +130,13 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
       let overId = null, before = true;
-      for (const el of document.querySelectorAll(`[data-inv-cat="${d.cat}"]`)) {
+      for (const el of document.querySelectorAll(`.inv-item[data-inv-cat="${d.cat}"]`)) {
         const r = el.getBoundingClientRect();
         if (y >= r.top - 4 && y <= r.bottom + 4) { overId = el.getAttribute('data-inv-id'); before = y < r.top + r.height / 2; break; }
       }
       if (y < 70) window.scrollBy(0, -12); else if (y > window.innerHeight - 110) window.scrollBy(0, 12);
-      const next = { ...d, y, overId: overId === d.id ? null : overId, before };
+      // מעל הקוביה הריקה עצמה — לא משנים מקום
+      const next = overId && overId !== d.id ? { ...d, y, overId, before } : { ...d, y };
       dragRef.current = next; setDrag(next);
     });
   }
@@ -239,13 +244,17 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
             {!isClosed && (
               <div className="inv-list">
                 {items.map((it) => (
-                  <InvRow key={it.id} it={it} sorting={sorting} open={openId === it.id} dragging={drag?.id === it.id} dropBefore={drag?.overId === it.id && drag.before} dropAfter={drag?.overId === it.id && !drag.before}
+                  <Fragment key={it.id}>
+                  {drag?.overId === it.id && drag.before && <div className="drop-slot" style={{ height: drag.h }} aria-hidden="true" />}
+                  <InvRow it={it} sorting={sorting} open={openId === it.id} dragging={drag?.id === it.id} 
                     pickMode={onlyAlerts} picked={picked.has(it.id)} onPick={() => { const n = new Set(picked); n.has(it.id) ? n.delete(it.id) : n.add(it.id); setPicked(n); }}
                     onToggle={() => setOpenId(openId === it.id ? null : it.id)}
                     onChange={(p) => update(it.id, p)} onRemove={() => remove(it.id)}
                     onShop={() => { toShopping([it]); setOpenId(null); }}
                     onMove={(dir) => setInventory(moveWithinCat(inventory, it.id, dir))}
                     gripProps={{ onPointerDown: (e) => onGripDown(e, it), onPointerMove: onGripMove, onPointerUp: onGripUp, onPointerCancel: onGripCancel }} />
+                  {drag?.overId === it.id && !drag.before && <div className="drop-slot" style={{ height: drag.h }} aria-hidden="true" />}
+                  </Fragment>
                 ))}
               </div>
             )}
@@ -254,7 +263,7 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
       })}
 
       {drag && (
-        <div className="drag-ghost" style={{ left: drag.x, top: drag.y - drag.dy, width: drag.w, height: drag.h }} aria-hidden="true">
+        <div className="drag-ghost" style={{ left: drag.x, top: drag.y - drag.dy, width: drag.w * 0.78, height: drag.h }} aria-hidden="true">
           <IconGrip /> <bdi>{drag.label}</bdi>
         </div>
       )}

@@ -201,3 +201,12 @@ test('v1.18: כוס = 240 מ״ל, מידה לא ידועה לאלכוהול = 30
   assert.equal(ingredientOf('Ouzo', '1 oz').group, 'ouzo');
   assert.equal(ingredientOf('Arak', '1 oz').group, 'arak');
 });
+
+import { servingMl } from './match.js';
+test('v1.19: כוס מבקבוק מוכן לפי המתכון, אניס מפוצל', () => {
+  const neg = { name: 'Negroni', ingredients: [ingredientOf('Gin', '1 oz'), ingredientOf('Campari', '1 oz'), ingredientOf('Sweet Vermouth', '1 oz'), ingredientOf('Ice', ''), ingredientOf('Orange Peel', '1')] };
+  assert.equal(servingMl(neg), 90);
+  assert.equal(ingredientOf('Pernod', '1 dash').group, 'pastis');
+  assert.equal(ingredientOf('Sambuca', '1 oz').group, 'sambuca');
+  assert.equal(ingredientOf('Absinthe', '1 oz').group, 'absinthe');
+});

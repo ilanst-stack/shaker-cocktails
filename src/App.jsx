@@ -178,11 +178,10 @@ function Main({ user }) {
           readyBottle={data.inventory.find((i) => i.key === `ready:${opened.drink.name}` && !(i.amount <= 0))} />
       )}
       {askLogout && (
-        <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="logout-title" onClick={(e) => { if (e.target === e.currentTarget) setAskLogout(false); }}>
-          <div className="modal panel">
+        <div className="modal-back center" role="dialog" aria-modal="true" aria-labelledby="logout-title" onClick={(e) => { if (e.target === e.currentTarget) setAskLogout(false); }}>
+          <div className="modal panel yellow">
             <h2 id="logout-title" className="h2" style={{ marginTop: 0 }}>להתנתק?</h2>
-            <p className="confirm-text"><bdi>{user.displayName || user.email}</bdi></p>
-            <p style={{ margin: '0 0 14px', fontSize: 14 }}>המלאי, המועדפים והדירוגים נשמרים — יחכו לך בכניסה הבאה.</p>
+            <p style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700 }}>המלאי, המועדפים והדירוגים נשמרים — יחכו לך בכניסה הבאה.</p>
             <div className="row" style={{ gap: 10 }}>
               <button className="btn" style={{ flex: 1 }} onClick={() => setAskLogout(false)}>ביטול</button>
               <button className="btn red" style={{ flex: 1 }} onClick={() => { setAskLogout(false); resetSticky(); logout(); }}>התנתקות</button>

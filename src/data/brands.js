@@ -62,8 +62,11 @@ export const BRANDS = [
   ...B('arak', [
     ['Arak Elite', 'ערק עלית'], ['Arak Kawar', 'ערק כאוור'], ['Arak Ashkelon', 'ערק אשקלון'], ['Arak Alouk', 'ערק אלוק'], ['Arak Touma', 'ערק תומא'], ['Arak Haddad', 'ערק חדאד'],
   ]),
+  ...B('sambuca', [['Sambuca Ramazzotti', 'סמבוקה רמזוטי'], ['Sambuca Molinari', 'סמבוקה מולינרי'], ['Luxardo Sambuca', 'סמבוקה לוקסרדו']]),
+  ...B('pastis', [['Pernod', 'פרנו'], ['Ricard', 'ריקאר'], ['Pastis 51', 'פסטיס 51'], ['Herbsaint', 'הרבסיינט']]),
+  ...B('absinthe', [['La Fée Absinthe', 'אבסינת לה פה'], ['Pernod Absinthe', 'אבסינת פרנו'], ['Hapsburg Absinthe', 'אבסינת הפסבורג']]),
   ...B('ouzo', [
-    ['Ouzo 12', 'אוזו 12'], ['Ouzo Plomari', 'אוזו פלומרי'], ['Ouzo Mini', 'אוזו מיני'], ['Tsantali Ouzo', 'אוזו צנטלי'], ['Sambuca Ramazzotti', 'סמבוקה רמזוטי'], ['Sambuca Molinari', 'סמבוקה מולינרי'], ['Pernod', 'פרנו'], ['Ricard', 'ריקאר'], ['Absinthe', 'אבסינת'],
+    ['Ouzo 12', 'אוזו 12'], ['Ouzo Plomari', 'אוזו פלומרי'], ['Ouzo Mini', 'אוזו מיני'], ['Tsantali Ouzo', 'אוזו צנטלי'],
   ]),
   // ---- ליקרים
   ...B('triple sec', [['Cointreau', 'קואנטרו'], ['Grand Marnier', 'גרנד מרנייה'], ['Bols Triple Sec', 'בולס טריפל סק'], ['De Kuyper Triple Sec', 'דה קויפר טריפל סק'], ['Marie Brizard Triple Sec', 'מארי בריזאר טריפל סק']]),

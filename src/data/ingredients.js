@@ -17,7 +17,9 @@ export const GROUPS = [
   { key: 'brandy', he: 'ברנדי / קוניאק', kind: 'spirit', color: '#A8521C', aliases: ['brandy', 'cognac', 'pisco', 'apple brandy', 'calvados', 'applejack'] },
   { key: 'cachaca', he: 'קשאסה', kind: 'spirit', color: '#F1EEDD', aliases: ['cachaca'] },
   { key: 'arak', he: 'ערק', kind: 'spirit', color: '#F7F7F2', aliases: ['arak', 'araq', 'arack', 'arrack'] },
-  { key: 'ouzo', he: 'אוזו (וגם סמבוקה / פרנו / אבסינת)', kind: 'spirit', color: '#F2F4F0', aliases: ['ouzo', 'anis', 'pernod', 'absinthe', 'pastis', 'anisette', 'sambuca', 'ricard'] },
+  { key: 'ouzo', he: 'אוזו', kind: 'spirit', color: '#F2F4F0', aliases: ['ouzo'] },
+  { key: 'pastis', he: 'פסטיס (פרנו / ריקאר)', kind: 'spirit', color: '#E9E2A0', aliases: ['pernod', 'pastis', 'ricard', 'anis', 'anisette', 'herbsaint'] },
+  { key: 'absinthe', he: 'אבסינת', kind: 'spirit', color: '#7FB77E', aliases: ['absinthe', 'absinth'] },
 
   // ---- ליקרים
   { key: 'triple sec', he: 'טריפל סק / קואנטרו', kind: 'liqueur', color: '#FBE7C6', aliases: ['triple sec', 'cointreau', 'grand marnier', 'orange curacao', 'curacao', 'orange liqueur'] },
@@ -32,9 +34,10 @@ export const GROUPS = [
   { key: 'bianco vermouth', he: 'ורמוט לבן מתוק (ביאנקו)', kind: 'wine', color: '#F4EBC9', aliases: ['bianco vermouth', 'vermouth bianco', 'martini bianco', 'blanc vermouth', 'sweet white vermouth'] },
   { key: 'elderflower liqueur', he: 'ליקר סמבוק (סן ז׳רמן)', kind: 'liqueur', color: '#F1E4A8', aliases: ['st-germain', 'st germain', 'st. germain', 'elderflower liqueur'] },
   { key: 'limoncello', he: 'לימונצ׳לו', kind: 'liqueur', color: '#F7E04B', aliases: ['limoncello'] },
+  { key: 'sambuca', he: 'סמבוקה', kind: 'liqueur', color: '#F4F4F4', aliases: ['sambuca', 'black sambuca', 'white sambuca'] },
   { key: 'peach schnapps', he: 'שנאפס אפרסק', kind: 'liqueur', color: '#FFC49B', aliases: ['peach schnapps', 'peachtree schnapps'] },
   { key: 'melon liqueur', he: 'ליקר מלון (מידורי)', kind: 'liqueur', color: '#7CC242', aliases: ['midori melon liqueur', 'midori', 'melon liqueur'] },
-  { key: 'raspberry liqueur', he: 'ליקר פטל / קסיס', kind: 'liqueur', color: '#9E1B4F', aliases: ['chambord raspberry liqueur', 'raspberry liqueur', 'creme de cassis', 'black sambuca'] },
+  { key: 'raspberry liqueur', he: 'ליקר פטל / קסיס', kind: 'liqueur', color: '#9E1B4F', aliases: ['chambord raspberry liqueur', 'raspberry liqueur', 'creme de cassis'] },
   { key: 'cacao liqueur', he: 'ליקר שוקולד', kind: 'liqueur', color: '#5C3A21', aliases: ['creme de cacao', 'white creme de cacao', 'chocolate liqueur', 'godiva liqueur'] },
   { key: 'mint liqueur', he: 'ליקר מנטה', kind: 'liqueur', color: '#5BC27A', aliases: ['creme de menthe', 'green creme de menthe', 'white creme de menthe', 'peppermint schnapps'] },
   { key: 'herbal liqueur', he: 'ליקר צמחים (יגרמייסטר / שרטרז)', kind: 'liqueur', color: '#4A3B1A', aliases: ['jägermeister', 'jagermeister', 'green chartreuse', 'yellow chartreuse', 'chartreuse', 'benedictine', 'galliano', 'drambuie', 'strega'] },
@@ -143,7 +146,7 @@ export const UNIT_HE = { ml: 'מ״ל', pcs: 'יח׳', g: 'גר׳' };
 
 // ---- אחוז אלכוהול (ABV) משוער לכל קבוצה
 const ABV = {
-  vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40, ouzo: 40,
+  vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40, ouzo: 40, pastis: 40, absinthe: 60, sambuca: 38,
   'triple sec': 35, 'blue curacao': 25, 'coffee liqueur': 20, 'irish cream': 17, amaretto: 28, campari: 25, aperol: 11, 'sweet vermouth': 16, 'dry vermouth': 18,
   'bianco vermouth': 15, 'elderflower liqueur': 20, limoncello: 28, 'rose wine': 12, 'peach schnapps': 20, 'melon liqueur': 20, 'raspberry liqueur': 16, 'cacao liqueur': 25, 'mint liqueur': 25, 'herbal liqueur': 35, 'other liqueur': 25, angostura: 44,
   'sparkling wine': 12, 'white wine': 12, 'red wine': 14, beer: 5, cider: 5,

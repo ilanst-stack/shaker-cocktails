@@ -36,6 +36,7 @@ export default function MadeDialog({ e, inventory, onCancel, onConfirm }) {
 
         {deduct && (
           <div className="made-plan">
+            {e.readyBottle && <div className="muted" style={{ fontSize: 13 }}>כוס אחת = {e.servingMl} מ״ל, לפי המתכון</div>}
             {plan.length === 0 && unlimited.length === 0 && <div className="muted" style={{ fontSize: 14 }}>אין מצרכים עם כמות רשומה במלאי — לא יורד כלום.</div>}
             {plan.map((c) => {
               const it = byId.get(c.id);

@@ -28,6 +28,8 @@ const SUBS = {
   'irish cream': ['cacao liqueur'],
   arak: ['ouzo'],
   ouzo: ['arak'],
+  pastis: ['absinthe'],
+  absinthe: ['pastis'],
 };
 
 const SQUEEZE = { 'lemon juice': 'lemon', 'lime juice': 'lime', 'orange juice': 'orange' };
@@ -44,15 +46,25 @@ export function inventoryMap(inventory) {
   return m;
 }
 
-const READY_ML = 90; // כוס אחת מבקבוק קוקטייל מוכן
 const KIND_ALC = new Set(['spirit', 'liqueur', 'wine']);
+// כמה מ״ל בכוס אחת לפי המתכון (לבקבוק קוקטייל מוכן): סכום הנוזלים, בלי קרח וקישוט
+export function servingMl(drink) {
+  let total = 0;
+  for (const i of drink.ingredients) {
+    const g = getGroup(i.group);
+    if (g?.assumed || g?.optional || i.unit === 'pcs' || i.unit === 'g') continue;
+    total += i.ml ?? (KIND_ALC.has(g?.kind) ? 30 : 60);
+  }
+  return total < 40 ? 90 : Math.round(total);
+}
 
 export function matchDrink(drink, inv) {
   // בקבוק מוכן של הקוקטייל הזה במלאי → מוכן, בלי קשר למצרכים
   const rb = inv.get(`ready:${drink.name}`);
   if (rb) {
-    const servings = rb.unlimited ? null : Math.floor((Number(rb.amount) || 0) / READY_ML);
-    return { drink, missing: [], optionalMissing: [], subs: [], notEnough: [], servings, ready: true, gap: 0, need: new Map(rb.unlimited ? [] : [[rb.key, READY_ML]]), readyBottle: rb };
+    const per = servingMl(drink);
+    const servings = rb.unlimited ? null : Math.floor((Number(rb.amount) || 0) / per);
+    return { drink, missing: [], optionalMissing: [], subs: [], notEnough: [], servings, ready: true, gap: 0, need: new Map(rb.unlimited ? [] : [[rb.key, per]]), readyBottle: rb, servingMl: per };
   }
   const missing = [];
   const optionalMissing = [];
