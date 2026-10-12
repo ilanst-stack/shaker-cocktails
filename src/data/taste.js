@@ -45,12 +45,12 @@ export function scoreEntry(entry, profile) {
   return score;
 }
 
-export function recommend(index, ratings, { limit = 20, maxGap = 1, favorites = [] } = {}) {
+export function recommend(index, ratings, { limit = 20, maxGap = 1, favorites = [], onlyReady = false } = {}) {
   const known = new Set(Object.keys(signals(ratings, favorites)));
   if (known.size < 2) return { needMore: 2 - known.size, items: [] };
   const profile = learnProfile(index, ratings, favorites);
   const items = index
-    .filter((e) => !known.has(e.drink.id) && e.gap <= maxGap)
+    .filter((e) => !known.has(e.drink.id) && (onlyReady ? e.ready : e.gap <= maxGap))
     .map((e) => ({ ...e, score: scoreEntry(e, profile) - e.gap * 0.8 }))
     .filter((e) => e.score > 0)
     .sort((a, b) => b.score - a.score)
