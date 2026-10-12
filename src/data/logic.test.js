@@ -150,3 +150,38 @@ test('house recipe converts and matches inventory', () => {
   assert.equal(e.ready, true);
   assert.equal(e.servings, 10);
 });
+
+import { deductionPlan, applyChanges, moveWithinCat, moveTo, isLow, isOut, ensureIds } from './inventory.js';
+import { inventoryMap as invMap2 } from './match.js';
+import { searchBrands } from './brands.js';
+
+test('בקבוקים מאותו סוג נספרים יחד, כמות 0 = אין', () => {
+  const m = invMap2([{ id: 'a', key: 'white rum', amount: 100 }, { id: 'b', key: 'white rum', amount: 50 }, { id: 'c', key: 'gin', amount: 0 }]);
+  assert.equal(m.get('white rum').amount, 150);
+  assert.equal(m.has('gin'), false);
+});
+
+test('הכנתי: יורד קודם מהבקבוק הקטן, לא מתחת ל-0', () => {
+  const inv = [{ id: 'a', key: 'vodka', amount: 500 }, { id: 'b', key: 'vodka', amount: 30 }, { id: 'c', key: 'orange juice', amount: 100 }];
+  const plan = deductionPlan(inv, new Map([['vodka', 45], ['orange juice', 120]]), 2);
+  const after = applyChanges(inv, plan);
+  assert.equal(after.find((x) => x.id === 'b').amount, 0);
+  assert.equal(after.find((x) => x.id === 'a').amount, 440);
+  assert.equal(after.find((x) => x.id === 'c').amount, 0);
+});
+
+test('סידור רק בתוך הקטגוריה', () => {
+  const inv = [{ id: 'a', key: 'vodka', kind: 'spirit' }, { id: 'j', key: 'orange juice', kind: 'juice' }, { id: 'b', key: 'gin', kind: 'spirit' }];
+  assert.deepEqual(moveWithinCat(inv, 'b', -1).map((x) => x.id), ['b', 'j', 'a']);
+  assert.equal(moveTo(inv, 'a', 'j'), inv);
+});
+
+test('מתמעט / נגמר וזיהוי מותגים', () => {
+  assert.equal(isLow({ key: 'gin', unit: 'ml', amount: 80 }), true);
+  assert.equal(isLow({ key: 'angostura', unit: 'ml', amount: 80 }), false);
+  assert.equal(isOut({ key: 'gin', amount: 0 }), true);
+  assert.equal(searchBrands('havana')[0].key, 'white rum');
+  assert.equal(searchBrands("ג'ק דניאלס")[0].key, 'whiskey');
+  assert.equal(searchBrands('שרידנס')[0].key, 'coffee liqueur');
+  assert.equal(ensureIds([{ key: 'gin' }, { key: 'gin' }]).map((x) => x.id).join(), 'k_gin,k_gin_');
+});

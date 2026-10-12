@@ -28,6 +28,9 @@ export const GROUPS = [
   { key: 'aperol', he: 'אפרול', kind: 'liqueur', color: '#F26A21', aliases: ['aperol'] },
   { key: 'sweet vermouth', he: 'ורמוט אדום (מתוק)', kind: 'wine', color: '#7A1F2B', aliases: ['sweet vermouth', 'vermouth', 'red vermouth', 'rosso vermouth', 'martini rosso'] },
   { key: 'dry vermouth', he: 'ורמוט יבש', kind: 'wine', color: '#EEE8C8', aliases: ['dry vermouth', 'lillet blanc', 'lillet', 'white vermouth', 'martini extra dry'] },
+  { key: 'bianco vermouth', he: 'ורמוט לבן מתוק (ביאנקו)', kind: 'wine', color: '#F4EBC9', aliases: ['bianco vermouth', 'vermouth bianco', 'martini bianco', 'blanc vermouth', 'sweet white vermouth'] },
+  { key: 'elderflower liqueur', he: 'ליקר סמבוק (סן ז׳רמן)', kind: 'liqueur', color: '#F1E4A8', aliases: ['st-germain', 'st germain', 'st. germain', 'elderflower liqueur'] },
+  { key: 'limoncello', he: 'לימונצ׳לו', kind: 'liqueur', color: '#F7E04B', aliases: ['limoncello'] },
   { key: 'peach schnapps', he: 'שנאפס אפרסק', kind: 'liqueur', color: '#FFC49B', aliases: ['peach schnapps', 'peachtree schnapps'] },
   { key: 'melon liqueur', he: 'ליקר מלון (מידורי)', kind: 'liqueur', color: '#7CC242', aliases: ['midori melon liqueur', 'midori', 'melon liqueur'] },
   { key: 'raspberry liqueur', he: 'ליקר פטל / קסיס', kind: 'liqueur', color: '#9E1B4F', aliases: ['chambord raspberry liqueur', 'raspberry liqueur', 'creme de cassis', 'black sambuca'] },
@@ -40,6 +43,7 @@ export const GROUPS = [
   // ---- יין ובירה
   { key: 'sparkling wine', he: 'שמפניה / פרוסקו / קאווה', kind: 'wine', color: '#F6EAB0', aliases: ['champagne', 'prosecco', 'sparkling wine', 'cava', 'brut'] },
   { key: 'white wine', he: 'יין לבן', kind: 'wine', color: '#F3EBB5', aliases: ['white wine', 'dry white wine'] },
+  { key: 'rose wine', he: 'יין רוזה', kind: 'wine', color: '#F4B6C2', aliases: ['rose wine', 'rosé wine', 'rosé', 'rose'] },
   { key: 'red wine', he: 'יין אדום', kind: 'wine', color: '#6E1423', aliases: ['red wine', 'port', 'sherry', 'dry sherry', 'ruby port'] },
   { key: 'beer', he: 'בירה', kind: 'wine', color: '#F2B705', aliases: ['beer', 'lager', 'ale', 'guinness stout', 'stout', 'corona'] },
   { key: 'cider', he: 'סיידר', kind: 'wine', color: '#F2C14E', aliases: ['cider', 'apple cider', 'hard cider'] },
@@ -140,7 +144,7 @@ export const UNIT_HE = { ml: 'מ״ל', pcs: 'יח׳', g: 'גר׳' };
 const ABV = {
   vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40,
   'triple sec': 35, 'blue curacao': 25, 'coffee liqueur': 20, 'irish cream': 17, amaretto: 28, campari: 25, aperol: 11, 'sweet vermouth': 16, 'dry vermouth': 18,
-  'peach schnapps': 20, 'melon liqueur': 20, 'raspberry liqueur': 16, 'cacao liqueur': 25, 'mint liqueur': 25, 'herbal liqueur': 35, 'other liqueur': 25, angostura: 44,
+  'bianco vermouth': 15, 'elderflower liqueur': 20, limoncello: 28, 'rose wine': 12, 'peach schnapps': 20, 'melon liqueur': 20, 'raspberry liqueur': 16, 'cacao liqueur': 25, 'mint liqueur': 25, 'herbal liqueur': 35, 'other liqueur': 25, angostura: 44,
   'sparkling wine': 12, 'white wine': 12, 'red wine': 14, beer: 5, cider: 5,
 };
 export const abvOf = (key) => ABV[key] ?? 0;

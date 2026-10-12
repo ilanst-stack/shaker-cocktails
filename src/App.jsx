@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { resetSticky } from './data/sticky.js';
 import { isConfigured, watchUser, logout } from './firebase.js';
 import { useUserData } from './data/userData.js';
@@ -14,6 +14,9 @@ import CocktailList from './components/CocktailList.jsx';
 import Favorites from './components/Favorites.jsx';
 import ForYou from './components/ForYou.jsx';
 import Recipe from './components/Recipe.jsx';
+import MadeDialog from './components/MadeDialog.jsx';
+import { applyChanges, lowThreshold, isLow, isOut } from './data/inventory.js';
+import { UNIT_HE, unitOf } from './data/ingredients.js';
 import AllCocktails from './components/AllCocktails.jsx';
 import CustomEditor from './components/CustomEditor.jsx';
 import { useCustomDrinks } from './data/custom.js';
@@ -55,13 +58,16 @@ const TABS = [
 ];
 
 function Main({ user }) {
-  const { data, error, setInventory, toggleFavorite, setRating, setTasted, setAdult } = useUserData(user.uid);
+  const { data, error, setInventory, setShopping, recordMade, toggleFavorite, setRating, setTasted, setAdult } = useUserData(user.uid);
   const [drinks, setDrinks] = useState(null);
   const [progress, setProgress] = useState(0);
   const [loadErr, setLoadErr] = useState('');
   const [tab, setTab] = useState(null);
   const [openId, setOpenId] = useState(null);
   const [editing, setEditing] = useState(null); // null | 'new' | drink
+  const [madeFor, setMadeFor] = useState(null); // קוקטייל שפתוח עליו חלון "הכנתי"
+  const [undo, setUndo] = useState(null); // { id, plan, n, msg }
+  const undoT = useRef(null);
   const custom = useCustomDrinks(user.uid);
 
   const load = (force) => {
@@ -107,6 +113,29 @@ function Main({ user }) {
   if (!drinks || !data || tab === null) return <Loading text="מערבב את המאגר…" progress={drinks ? null : progress} />;
 
   const opened = openId && index.find((e) => e.drink.id === openId);
+  function confirmMade(e, n, plan) {
+    const id = e.drink.id;
+    recordMade(id, n, plan.length ? applyChanges(data.inventory, plan) : null);
+    if (!data.tasted[id]) setTasted(id, true);
+    setMadeFor(null);
+    const byId = new Map(data.inventory.map((i) => [i.id, i]));
+    const low = plan.map((c) => ({ c, it: byId.get(c.id) })).filter(({ c, it }) => c.after < lowThreshold(it));
+    const msg = low.length
+      ? `נשארו ${low.map(({ c, it }) => `${c.after} ${UNIT_HE[it.unit || unitOf(it.key)]} ${it.brand || it.he}`).join(', ')}`
+      : `לחיים! ${n > 1 ? `${n} כוסות נרשמו` : 'נרשם'}`;
+    clearTimeout(undoT.current);
+    setUndo({ id, plan, n, msg });
+    undoT.current = setTimeout(() => setUndo(null), 5000);
+    setTimeout(() => document.querySelector('.stars')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  }
+  function undoMade() {
+    if (!undo) return;
+    const back = undo.plan.map((c) => ({ id: c.id, after: c.before }));
+    recordMade(undo.id, -undo.n, back.length ? applyChanges(data.inventory, back) : null);
+    clearTimeout(undoT.current);
+    setUndo(null);
+  }
+
   const common = { index, user: data, onOpen: open, onFav: toggleFavorite, onNewCustom: () => setEditing('new') };
 
   return (
@@ -123,7 +152,7 @@ function Main({ user }) {
         </button>
       </header>
 
-      {tab === 'inventory' && <Inventory inventory={visibleInv} setInventory={setVisibleInv} ingredientNames={names} kids={kids} />}
+      {tab === 'inventory' && <Inventory inventory={visibleInv} setInventory={setVisibleInv} ingredientNames={names} kids={kids} shopping={data.shopping || []} setShopping={setShopping} index={index} />}
       {tab === 'cocktails' && <CocktailList {...common} inventoryCount={data.inventory.length} />}
       {tab === 'all' && <AllCocktails {...common} />}
       {tab === 'mine' && <Favorites {...common} />}
@@ -131,13 +160,25 @@ function Main({ user }) {
 
       <nav className="tabbar" aria-label="ניווט ראשי">
         {TABS.map(({ id, he, Icon }) => (
-          <button key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => { setTab(id); window.scrollTo(0, 0); }}><Icon />{he}</button>
+          <button key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => { setTab(id); window.scrollTo(0, 0); }} style={{ position: 'relative' }}>
+            <Icon />{he}
+            {id === 'inventory' && visibleInv.some((i) => isLow(i) || isOut(i)) && <span className="nav-dot" aria-label="יש מצרכים שמתמעטים" />}
+          </button>
         ))}
       </nav>
 
       {opened && (
         <Recipe e={opened} uid={user.uid} fav={data.favorites.includes(opened.drink.id)} rating={data.ratings[opened.drink.id]} tasted={!!data.tasted[opened.drink.id]}
-          onBack={close} onFav={() => toggleFavorite(opened.drink.id)} onRate={(r) => setRating(opened.drink.id, r)} onTasted={(on) => setTasted(opened.drink.id, on)} onEdit={opened.drink.custom ? () => setEditing(opened.drink) : null} />
+          onBack={close} onFav={() => toggleFavorite(opened.drink.id)} onRate={(r) => setRating(opened.drink.id, r)} onTasted={(on) => setTasted(opened.drink.id, on)} onEdit={opened.drink.custom ? () => setEditing(opened.drink) : null}
+          madeCount={data.made?.[opened.drink.id] || 0} onMade={() => setMadeFor(opened)}
+          readyBottle={data.inventory.find((i) => i.key === `ready:${opened.drink.name}` && !(i.amount <= 0))} />
+      )}
+      {madeFor && <MadeDialog e={madeFor} inventory={visibleInv} onCancel={() => setMadeFor(null)} onConfirm={(n, plan) => confirmMade(madeFor, n, plan)} />}
+      {undo && (
+        <div className="toast undo" role="status">
+          <span>{undo.msg}</span>
+          <button onClick={undoMade}>ביטול</button>
+        </div>
       )}
       {editing && (
         <CustomEditor uid={user.uid} kids={kids} drink={editing === 'new' ? null : editing}

@@ -23,13 +23,22 @@ const SUBS = {
   milk: ['cream'],
   cream: ['milk'],
   'sparkling wine': ['white wine'],
+  'white wine': ['rose wine'],
+  'dry vermouth': ['bianco vermouth'],
+  'irish cream': ['cacao liqueur'],
 };
 
 const SQUEEZE = { 'lemon juice': 'lemon', 'lime juice': 'lime', 'orange juice': 'orange' };
 
+// כמה בקבוקים מאותו סוג (למשל Bacardi + Havana Club) נספרים יחד. כמות 0 = אין.
 export function inventoryMap(inventory) {
   const m = new Map();
-  for (const it of inventory || []) m.set(it.key, it);
+  for (const it of inventory || []) {
+    if (!it.unlimited && !(Number(it.amount) > 0)) continue;
+    const cur = m.get(it.key);
+    if (!cur) { m.set(it.key, { ...it }); continue; }
+    m.set(it.key, { ...cur, unlimited: cur.unlimited || it.unlimited, amount: (Number(cur.amount) || 0) + (Number(it.amount) || 0) });
+  }
   return m;
 }
 
@@ -66,7 +75,7 @@ export function matchDrink(drink, inv) {
     servings = servings == null ? n : Math.min(servings, n);
   }
   const ready = missing.length === 0 && notEnough.length === 0;
-  return { drink, missing, optionalMissing, subs, notEnough, servings, ready, gap: missing.length + notEnough.length };
+  return { drink, missing, optionalMissing, subs, notEnough, servings, ready, gap: missing.length + notEnough.length, need };
 }
 
 // ---------- סיווג

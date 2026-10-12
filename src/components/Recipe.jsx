@@ -24,7 +24,7 @@ export function splitSteps(text) {
   return parts.length ? parts : ['מערבבים את כל המצרכים ומגישים.'];
 }
 
-export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onRate, onTasted, onEdit }) {
+export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onRate, onTasted, onEdit, madeCount = 0, onMade, readyBottle }) {
   const d = e.drink;
   const [photo, setPhoto] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -142,6 +142,10 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
             <span>{e.count} מצרכים</span>
           </div>
 
+          {readyBottle && (
+            <div className="ready-note" role="note">יש לך בקבוק מוכן: <bdi>{readyBottle.brand || readyBottle.he}</bdi> — רק למזוג על קרח.</div>
+          )}
+
           {d.custom && d.notes && (
             <>
               <h2 className="h2">הסיפור מאחורי הקוקטייל</h2>
@@ -183,13 +187,14 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
                 {photo && <button className="icon-btn" aria-label="מחק תמונה" onClick={async () => { await removePhoto(uid, d.id); setPhoto(null); }}><IconTrash /></button>}
               </div>
               {msg && <p role="status" style={{ fontWeight: 700, margin: '8px 0 0' }}>{msg}</p>}
+              {madeCount > 0 && <p style={{ fontWeight: 700, margin: '10px 0 0' }}>הכנת עד היום {madeCount === 1 ? 'כוס אחת' : `${madeCount} כוסות`} מהקוקטייל הזה</p>}
             </div>
           </div>
         </div>
 
         <div className="sticky-actions">
           <button className="btn" style={{ flex: 1 }} onClick={onBack}>חזרה</button>
-          <button className="btn red" style={{ flex: 2 }} onClick={() => { onTasted(true); document.querySelector('.stars')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>הכנתי! לדירוג</button>
+          <button className="btn red" style={{ flex: 2 }} onClick={onMade}>הכנתי!</button>
         </div>
       </div>
     </div>

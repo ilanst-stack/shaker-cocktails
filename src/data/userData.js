@@ -1,12 +1,13 @@
 // כל המידע של המשתמש נשמר ב-Firestore:
-// users/{uid}            → { inventory: [...], favorites: [id], ratings: { id: 0–5 }, tasted: { id: תאריך } }
+// users/{uid}            → { inventory: [...], favorites: [id], ratings: { id: 0–5 }, tasted: { id: תאריך }, shopping: [...], made: { id: כמה פעמים } }
 // users/{uid}/photos/{id} → { data: תמונה דחוסה (base64), at }
 import { useEffect, useState, useCallback } from 'react';
 import { doc, onSnapshot, setDoc, getDoc, deleteDoc, serverTimestamp, deleteField } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { migrateInventory } from './ingredients.js';
+import { ensureIds } from './inventory.js';
 
-const EMPTY = { inventory: [], favorites: [], ratings: {}, tasted: {} };
+const EMPTY = { inventory: [], favorites: [], ratings: {}, tasted: {}, shopping: [], made: {} };
 
 export function useUserData(uid) {
   const [data, setData] = useState(null);
@@ -17,7 +18,7 @@ export function useUserData(uid) {
     const ref = doc(db, 'users', uid);
     return onSnapshot(ref, (snap) => {
       const d = { ...EMPTY, ...(snap.data() || {}) };
-      setData({ ...d, inventory: migrateInventory(d.inventory) });
+      setData({ ...d, inventory: ensureIds(migrateInventory(d.inventory)) });
     }, (e) => setError(e));
   }, [uid]);
 
@@ -25,6 +26,9 @@ export function useUserData(uid) {
 
   const api = {
     setInventory: (inventory) => save({ inventory }),
+    setShopping: (shopping) => save({ shopping }),
+    // "הכנתי": מלאי מעודכן + מונה הכנות (delta יכול להיות שלילי — ביטול)
+    recordMade: (id, delta, inventory) => save({ made: { [id]: Math.max(0, (data?.made?.[id] || 0) + delta) }, ...(inventory ? { inventory } : {}) }),
     toggleFavorite: (id) => {
       const fav = new Set(data?.favorites || []);
       fav.has(id) ? fav.delete(id) : fav.add(id);

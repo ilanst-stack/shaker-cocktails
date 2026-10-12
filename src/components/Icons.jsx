@@ -19,3 +19,10 @@ export function Star({ on, size = 32, fill = '#FFE14D' }) {
     </svg>
   );
 }
+export const IconCart = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M3 4h2l2.4 11h10.2L20 8H6.3" /><circle cx="9" cy="19.5" r="1.5" /><circle cx="17" cy="19.5" r="1.5" /></svg>);
+export const IconSort = () => (<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" {...S}><path d="M8 4v16M4 8l4-4 4 4M16 20V4M12 16l4 4 4-4" /></svg>);
+export const IconGrip = () => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.7" /><circle cx="15" cy="6" r="1.7" /><circle cx="9" cy="12" r="1.7" /><circle cx="15" cy="12" r="1.7" /><circle cx="9" cy="18" r="1.7" /><circle cx="15" cy="18" r="1.7" /></svg>);
+export const IconChevron = ({ dir = 'down' }) => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" {...S} strokeWidth={2.8} style={{ transform: { down: 'none', up: 'rotate(180deg)', left: 'rotate(90deg)', right: 'rotate(-90deg)' }[dir] }}><path d="M6 9l6 6 6-6" /></svg>);
+export const IconAlert = () => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" {...S}><path d="M12 3l10 18H2z M12 10v5 M12 18v.5" /></svg>);
+export const IconShare = () => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" {...S}><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6" /></svg>);
+export const IconCheck = () => (<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" {...S} strokeWidth={3}><path d="M5 12.5l4.5 4.5L19 7" /></svg>);

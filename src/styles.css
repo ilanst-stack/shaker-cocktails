@@ -191,3 +191,47 @@ button { cursor: pointer; }
 .ing-row .unit { width: 86px; flex-shrink: 0; }
 .notes-panel { background: #E8F5E9; border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 12px 14px; white-space: pre-wrap; line-height: 1.5; }
 .step-cols.single { grid-template-columns: minmax(0, 1fr); }
+
+/* ---- מלאי: סרגל כלים, קטגוריות מתקפלות, שורות קומפקטיות */
+.inv-tools { display: flex; gap: 8px; margin-top: 10px; }
+.inv-tools .tool { flex: 1; white-space: nowrap; min-height: 44px; border: 2.5px solid var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--ink); font: 700 13px var(--body); display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 0 4px; color: var(--ink); }
+.inv-tools .tool[aria-pressed='true'] { background: var(--ink); color: var(--yellow); }
+.inv-tools .tool .pill-count { background: var(--red); color: #fff; padding: 1px 7px; }
+.suggest button.free { background: #FFF7CC; }
+.inv-alert { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 8px 10px; background: #FFE9C7; border: 2.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-weight: 700; font-size: 14px; }
+.inv-alert button { min-height: 36px; border: 2px solid var(--ink); background: #fff; font: 700 13px var(--body); padding: 0 10px; color: var(--ink); }
+.inv-cat { margin-top: 16px; }
+.inv-cat-h { width: 100%; display: flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 4px 0; color: var(--ink); text-align: right; }
+.inv-cat-h .t { font: 700 30px/1 var(--display); }
+.inv-cat-h .flags { margin-inline-start: auto; display: flex; gap: 6px; }
+.flag { font: 700 12px var(--body); padding: 2px 8px; border-radius: 999px; border: 2px solid var(--ink); white-space: nowrap; }
+.flag.low { background: #FFC46B; }
+.flag.out { background: #fff; color: #8B0000; border-color: #8B0000; }
+.inv-item { flex-direction: column; align-items: stretch; padding: 6px 8px; }
+.inv-line { display: flex; align-items: center; gap: 8px; }
+.inv-item.out { opacity: .5; filter: grayscale(1); border-style: dashed; box-shadow: none; }
+.inv-item.out.open { opacity: 1; filter: none; }
+.inv-item.dragging { outline: 3px dashed var(--red); outline-offset: 2px; }
+.inv-item .grip { flex-shrink: 0; width: 32px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; color: var(--ink); }
+.amt-pill { flex-shrink: 0; min-height: 38px; min-width: 76px; border: 2.5px solid var(--ink); border-radius: 999px; background: #fff; font: 700 14px var(--body); padding: 0 10px; color: var(--ink); }
+.amt-pill.low { background: #FFC46B; }
+.amt-pill.out { background: #fff; color: #8B0000; border-color: #8B0000; }
+.mini { width: 40px; height: 40px; border: 2px solid var(--ink); background: #fff; display: inline-flex; align-items: center; justify-content: center; padding: 0; color: var(--ink); }
+.inv-edit { border-top: 2px dashed var(--ink); margin-top: 8px; padding-top: 8px; }
+.toggle.danger { color: #8B0000; border-color: #8B0000; }
+.toggle { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); }
+/* ---- רשימת קניות */
+.check { width: 34px; height: 34px; flex-shrink: 0; border: 3px solid var(--ink); background: #fff; border-radius: 6px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.check.on { background: var(--lime); }
+.sel { width: auto; min-height: 40px; padding: 4px 8px; font-size: 15px; }
+.out-done { opacity: .7; box-shadow: none; }
+/* ---- חלון "הכנתי" */
+.modal-back { position: fixed; inset: 0; z-index: 50; background: rgba(17, 17, 17, .55); display: flex; align-items: flex-end; justify-content: center; padding: 12px; }
+.modal { width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; margin-bottom: 8px; }
+.stepper { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.stepper output { font: 700 54px/1 var(--display); min-width: 50px; text-align: center; }
+.made-plan { display: flex; flex-direction: column; gap: 6px; font-size: 15px; background: #FFF7CC; border: 2px solid var(--ink); padding: 8px 10px; }
+.toast.undo { display: flex; align-items: center; gap: 12px; transform: translateX(-50%); font: 700 16px var(--body); max-width: calc(100vw - 32px); }
+.toast.undo button { border: 2px solid var(--yellow); background: transparent; color: var(--yellow); font: 700 15px var(--body); min-height: 36px; padding: 0 12px; }
+.ready-note { margin: 14px 0 0; background: #fff; border: 3px dashed var(--ink); padding: 10px 12px; font-weight: 700; }
+.nav-dot { position: absolute; top: 6px; left: 50%; margin-left: 10px; width: 11px; height: 11px; border-radius: 50%; background: #FFA319; border: 2px solid var(--ink); }
