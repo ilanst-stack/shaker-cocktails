@@ -2,6 +2,7 @@
 // { id, key, he, kind, unit, unlimited, amount, brand?, brandHe?, label?, cat?, free? }
 import { getGroup, unitOf } from './ingredients.js';
 import { isReadyKey } from './brands.js';
+import { isAlcoholKey } from './age.js';
 
 export const KIND_ORDER = ['spirit', 'liqueur', 'wine', 'ready', 'juice', 'mixer', 'fresh', 'sweet', 'dairy', 'garnish', 'other'];
 export const KIND_HE = { spirit: 'אלכוהול', liqueur: 'ליקרים', wine: 'יין, ורמוט ובירה', ready: 'קוקטיילים מוכנים', juice: 'מיצים', mixer: 'מוגזים ומשקאות', fresh: 'פירות ועשבים', sweet: 'ממתיקים וסירופים', dairy: 'חלב וביצים', garnish: 'תבלינים וקישוטים', other: 'אחר' };
@@ -88,3 +89,7 @@ export function addPurchase(inv, item, mkItem) {
   if (same) return inv.map((x) => (x === same ? { ...x, amount: Math.round(((Number(x.amount) || 0) + ml) * 100) / 100 } : x));
   return [...inv, { ...mkItem(item), amount: ml }];
 }
+
+// מתחת ל-18: מסתירים אלכוהול, קוקטיילים מוכנים ומוצרים חופשיים בקטגוריות אלכוהול
+const ADULT_CATS = new Set(['spirit', 'liqueur', 'wine', 'ready']);
+export const isAdultItem = (it) => isAlcoholKey(it.key) || isReadyKey(it.key) || ADULT_CATS.has(catOf(it)) || ADULT_CATS.has(it.kind);

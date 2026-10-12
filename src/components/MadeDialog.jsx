@@ -5,6 +5,11 @@ import { deductionPlan } from '../data/inventory.js';
 import { fmtNum } from '../data/measure.js';
 import { IconPlus } from './Icons.jsx';
 
+const label = (it) => {
+  const type = String(it.key).startsWith('ready:') ? it.key.slice(6) : it.he.replace(/\s*\(.*\)\s*$/, '');
+  return it.brand && it.brand !== type ? `${type} · ${it.brand}` : type;
+};
+
 export default function MadeDialog({ e, inventory, onCancel, onConfirm }) {
   const [n, setN] = useState(1);
   const [deduct, setDeduct] = useState(true);
@@ -37,8 +42,8 @@ export default function MadeDialog({ e, inventory, onCancel, onConfirm }) {
               const u = UNIT_HE[it.unit || unitOf(it.key)];
               return (
                 <div key={c.id} className="row" style={{ justifyContent: 'space-between' }}>
-                  <bdi>{it.brand || it.he}</bdi>
-                  <span style={{ whiteSpace: 'nowrap' }}>
+                  <bdi>{label(it)}</bdi>
+                  <span className="qty">
                     {fmtNum(c.before)} ← <b>{fmtNum(c.after)}</b> {u}
                     {c.after <= 0 && <span className="flag out" style={{ marginRight: 6 }}>נגמר</span>}
                   </span>
@@ -46,7 +51,7 @@ export default function MadeDialog({ e, inventory, onCancel, onConfirm }) {
               );
             })}
             {unlimited.map((it) => (
-              <div key={it.id} className="row muted" style={{ justifyContent: 'space-between' }}><bdi>{it.brand || it.he}</bdi><span>בלי הגבלה</span></div>
+              <div key={it.id} className="row muted" style={{ justifyContent: 'space-between' }}><bdi>{label(it)}</bdi><span className="qty">בלי הגבלה</span></div>
             ))}
           </div>
         )}

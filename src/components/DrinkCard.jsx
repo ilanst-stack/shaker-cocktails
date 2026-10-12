@@ -41,6 +41,7 @@ export default function DrinkCard({ e, fav, rating, onOpen, onFav, highlight, sh
         {he && <div style={{ fontSize: 13, fontWeight: 700 }}>{he}</div>}
         <div className="tags">
           {e.drink.custom && <span className="tag house">מתכון בית</span>}
+          {e.readyBottle && <span className="tag house">בקבוק מוכן</span>}
           {e.families.slice(0, 3).map((f) => <span key={f} className="tag">{FAM_HE[f]}</span>)}
           {rating != null && <span className="tag" style={{ background: '#111', color: '#FFE14D' }}>★ {rating}</span>}
         </div>

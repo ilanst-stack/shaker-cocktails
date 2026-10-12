@@ -26,6 +26,8 @@ const SUBS = {
   'white wine': ['rose wine'],
   'dry vermouth': ['bianco vermouth'],
   'irish cream': ['cacao liqueur'],
+  arak: ['ouzo'],
+  ouzo: ['arak'],
 };
 
 const SQUEEZE = { 'lemon juice': 'lemon', 'lime juice': 'lime', 'orange juice': 'orange' };
@@ -42,7 +44,16 @@ export function inventoryMap(inventory) {
   return m;
 }
 
+const READY_ML = 90; // כוס אחת מבקבוק קוקטייל מוכן
+const KIND_ALC = new Set(['spirit', 'liqueur', 'wine']);
+
 export function matchDrink(drink, inv) {
+  // בקבוק מוכן של הקוקטייל הזה במלאי → מוכן, בלי קשר למצרכים
+  const rb = inv.get(`ready:${drink.name}`);
+  if (rb) {
+    const servings = rb.unlimited ? null : Math.floor((Number(rb.amount) || 0) / READY_ML);
+    return { drink, missing: [], optionalMissing: [], subs: [], notEnough: [], servings, ready: true, gap: 0, need: new Map(rb.unlimited ? [] : [[rb.key, READY_ML]]), readyBottle: rb };
+  }
   const missing = [];
   const optionalMissing = [];
   const subs = [];
@@ -62,6 +73,8 @@ export function matchDrink(drink, inv) {
     // הכמות ביחידה של המצרך במלאי (מ״ל / יח׳ / גר׳). בהחלפה ליחידה אחרת — לא מחשבים
     const haveUnit = have.unit || unitOf(have.key);
     let amt = haveUnit === ing.unit ? ing.amount : null;
+    // מידה לא מוכרת ("a dash of…", "1 part"…) לאלכוהול עם כמות במלאי — לא "בלי הגבלה", אלא 30 מ״ל
+    if (amt == null && haveUnit === 'ml' && !have.unlimited && KIND_ALC.has(getGroup(have.key)?.kind)) amt = 30;
     // מיץ שנסחט מפרי טרי: מ״ל במתכון → מספר פירות במלאי
     if (haveUnit === 'pcs' && ing.unit === 'ml' && ing.ml && pcsMlOf(have.key)) amt = Math.round((ing.ml / pcsMlOf(have.key)) * 100) / 100;
     if (!have.unlimited && amt) need.set(have.key, (need.get(have.key) || 0) + amt);

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GROUPS, groupOf, norm, getGroup, unitOf, defaultAmount, UNIT_HE } from '../data/ingredients.js';
 import { searchBrands, isReadyKey } from '../data/brands.js';
-import { KIND_ORDER, KIND_HE, newId, catOf, isMovable, isLow, isOut, moveWithinCat, moveTo } from '../data/inventory.js';
-import { IconTrash, IconPlus, IconSearch, IconCamera, IconCart, IconSort, IconGrip, IconChevron, IconAlert } from './Icons.jsx';
+import { KIND_ORDER, KIND_HE, newId, catOf, isMovable, isLow, isOut, moveWithinCat } from '../data/inventory.js';
+import { IconTrash, IconPlus, IconSearch, IconCamera, IconCart, IconSort, IconGrip, IconChevron, IconAlert, IconCheck } from './Icons.jsx';
 import ScanShelf from './ScanShelf.jsx';
 import ScrollRow from './ScrollRow.jsx';
 import ShoppingList, { shopItemFrom } from './ShoppingList.jsx';
@@ -29,7 +29,7 @@ export function newItem(nameOrKey, amount, label, brand) {
   return { id: newId(), key: norm(nameOrKey), he: String(nameOrKey).trim(), kind: 'other', cat: 'other', free: true, unit: 'ml', unlimited: false, amount: amount ?? 700 };
 }
 
-export default function Inventory({ inventory, setInventory, ingredientNames, kids, shopping, setShopping, index }) {
+export default function Inventory({ inventory, setInventory, ingredientNames, kids, shopping, setShopping, index, drinkNames = [] }) {
   const [q, setQ] = useState('');
   const [focus, setFocus] = useState(false);
   const [scan, setScan] = useState(false);
@@ -38,6 +38,8 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
   const [openId, setOpenId] = useState(null);
   const [closed, setClosed] = useSticky('inv.closed', []);
   const [onlyAlerts, setOnlyAlerts] = useState(false);
+  const [picked, setPicked] = useState(() => new Set()); // סימון מתמעטים להוספה לקניות
+  const [toast, setToast] = useState('');
   const plainHave = useMemo(() => new Set(inventory.filter((i) => !i.brand).map((i) => i.key)), [inventory]);
   const blurT = useRef(null);
 
@@ -63,10 +65,18 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
       seen.add(k);
       out.push({ id: `n:${n}`, add: () => add(n), main: n, sub: 'מהמאגר' });
     }
-    const list = out.slice(0, 12);
+    // קוקטייל שנמכר מוכן בבקבוק (כל קוקטייל מהמאגר)
+    if (!kids && t.length >= 3) {
+      const have = new Set(inventory.map((i) => i.key));
+      for (const n of drinkNames.filter((n) => norm(n).includes(t)).slice(0, 3)) {
+        if (have.has(`ready:${n}`) || out.some((o) => o.id === `b:${n}`)) continue;
+        out.push({ id: `r:${n}`, add: () => add(`ready:${n}`, { en: n, he: 'קוקטייל מוכן בבקבוק' }), main: n, sub: 'קוקטייל מוכן בבקבוק' });
+      }
+    }
+    const list = out.slice(0, 14);
     list.push({ id: 'free', add: () => add(q.trim()), main: `+ להוסיף "${q.trim()}" כמוצר חופשי`, sub: 'לרישום המלאי בלבד — לא משמש במתכונים', free: true });
     return list;
-  }, [q, plainHave, ingredientNames, kids, inventory]);
+  }, [q, plainHave, ingredientNames, kids, inventory, drinkNames]);
 
   function add(key, brand) {
     const it = newItem(key, undefined, undefined, brand);
@@ -97,24 +107,48 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
     return [...m.entries()].sort((a, b) => KIND_ORDER.indexOf(a[0]) - KIND_ORDER.indexOf(b[0]));
   }, [inventory, onlyAlerts]);
 
-  // ---- גרירה (עובד גם במגע)
-  const drag = useRef(null);
-  const [dragId, setDragId] = useState(null);
-  function onGripDown(e, id) {
+  // ---- גרירה (עובד גם במגע): פריט צף עוקב אחרי האצבע, קו מסמן איפה ינחת, שמירה רק בשחרור
+  const [drag, setDrag] = useState(null); // { id, cat, label, x, y, dy, w, h, overId, before }
+  const dragRef = useRef(null);
+  const raf = useRef(0);
+  function onGripDown(e, it) {
     e.preventDefault();
-    drag.current = id; setDragId(id);
+    const row = e.currentTarget.closest('[data-inv-id]').getBoundingClientRect();
+    const d = { id: it.id, cat: catOf(it), label: it.brand ? `${typeName(it)} · ${it.brand}` : typeName(it), x: row.left, y: e.clientY, dy: e.clientY - row.top, w: row.width, h: row.height, overId: null, before: true };
+    dragRef.current = d; setDrag(d);
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    navigator.vibrate?.(15);
   }
   function onGripMove(e) {
-    if (!drag.current) return;
-    const el = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-inv-id]');
-    const target = el?.getAttribute('data-inv-id');
-    if (target && target !== drag.current) {
-      const next = moveTo(inventory, drag.current, target);
-      if (next !== inventory) setInventory(next);
-    }
+    const d = dragRef.current;
+    if (!d) return;
+    const y = e.clientY;
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      let overId = null, before = true;
+      for (const el of document.querySelectorAll(`[data-inv-cat="${d.cat}"]`)) {
+        const r = el.getBoundingClientRect();
+        if (y >= r.top - 4 && y <= r.bottom + 4) { overId = el.getAttribute('data-inv-id'); before = y < r.top + r.height / 2; break; }
+      }
+      if (y < 70) window.scrollBy(0, -12); else if (y > window.innerHeight - 110) window.scrollBy(0, 12);
+      const next = { ...d, y, overId: overId === d.id ? null : overId, before };
+      dragRef.current = next; setDrag(next);
+    });
   }
-  const onGripUp = () => { drag.current = null; setDragId(null); };
+  function onGripUp() {
+    const d = dragRef.current;
+    cancelAnimationFrame(raf.current);
+    dragRef.current = null; setDrag(null);
+    if (!d?.overId) return;
+    const rest = inventory.filter((x) => x.id !== d.id);
+    let idx = rest.findIndex((x) => x.id === d.overId);
+    if (idx < 0) return;
+    if (!d.before) idx += 1;
+    const moved = inventory.find((x) => x.id === d.id);
+    rest.splice(idx, 0, moved);
+    setInventory(rest);
+  }
+  const onGripCancel = () => { cancelAnimationFrame(raf.current); dragRef.current = null; setDrag(null); };
 
   const unsorted = shopping.filter((s) => !s.done).length;
 
@@ -164,13 +198,26 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
           <span style={{ flex: 1 }}>
             {[alerts.low.length && `${alerts.low.length} מתמעטים`, alerts.out.length && `${alerts.out.length} נגמרו`].filter(Boolean).join(' · ')}
           </span>
-          <button onClick={() => setOnlyAlerts(!onlyAlerts)}>{onlyAlerts ? 'הצג הכל' : 'הצג'}</button>
-          <button onClick={() => { const n = toShopping([...alerts.low, ...alerts.out]); if (n) setShopOpen(true); }}>לקניות</button>
+          <button onClick={() => { setOnlyAlerts(!onlyAlerts); setPicked(new Set()); setSorting(false); setOpenId(null); }}>{onlyAlerts ? 'סגור' : 'הצג'}</button>
         </div>
       )}
 
       {inventory.length === 0 && (
         <div className="bubble" style={{ marginTop: 22 }}><b>הבר ריק! תתחיל להוסיף בקבוקים.</b></div>
+      )}
+
+      {onlyAlerts && (
+        <div className="alert-bar">
+          <span>סמן מה להוסיף לרשימת הקניות:</span>
+          <button className="toggle" onClick={() => setPicked(picked.size === alerts.low.length + alerts.out.length ? new Set() : new Set([...alerts.low, ...alerts.out].map((i) => i.id)))}>
+            {picked.size === alerts.low.length + alerts.out.length ? 'נקה הכל' : 'סמן הכל'}
+          </button>
+          <button className="btn red small" disabled={!picked.size} onClick={() => {
+            const n = toShopping(inventory.filter((i) => picked.has(i.id)));
+            setPicked(new Set()); setOnlyAlerts(false);
+            setToast(n ? `${n} נוספו לרשימת הקניות` : 'כבר ברשימת הקניות'); setTimeout(() => setToast(''), 2200);
+          }}>הוסף לקניות{picked.size ? ` (${picked.size})` : ''}</button>
+        </div>
       )}
 
       {sorting && inventory.length > 0 && <p className="muted" style={{ fontSize: 13, margin: '12px 0 0' }}>גרור בעזרת הידית או השתמש בחיצים. הסידור אפשרי בתוך הקטגוריה בלבד.</p>}
@@ -192,12 +239,13 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
             {!isClosed && (
               <div className="inv-list">
                 {items.map((it) => (
-                  <InvRow key={it.id} it={it} sorting={sorting} open={openId === it.id} dragging={dragId === it.id}
+                  <InvRow key={it.id} it={it} sorting={sorting} open={openId === it.id} dragging={drag?.id === it.id} dropBefore={drag?.overId === it.id && drag.before} dropAfter={drag?.overId === it.id && !drag.before}
+                    pickMode={onlyAlerts} picked={picked.has(it.id)} onPick={() => { const n = new Set(picked); n.has(it.id) ? n.delete(it.id) : n.add(it.id); setPicked(n); }}
                     onToggle={() => setOpenId(openId === it.id ? null : it.id)}
                     onChange={(p) => update(it.id, p)} onRemove={() => remove(it.id)}
                     onShop={() => { toShopping([it]); setOpenId(null); }}
                     onMove={(dir) => setInventory(moveWithinCat(inventory, it.id, dir))}
-                    gripProps={{ onPointerDown: (e) => onGripDown(e, it.id), onPointerMove: onGripMove, onPointerUp: onGripUp, onPointerCancel: onGripUp }} />
+                    gripProps={{ onPointerDown: (e) => onGripDown(e, it), onPointerMove: onGripMove, onPointerUp: onGripUp, onPointerCancel: onGripCancel }} />
                 ))}
               </div>
             )}
@@ -205,10 +253,23 @@ export default function Inventory({ inventory, setInventory, ingredientNames, ki
         );
       })}
 
+      {drag && (
+        <div className="drag-ghost" style={{ left: drag.x, top: drag.y - drag.dy, width: drag.w, height: drag.h }} aria-hidden="true">
+          <IconGrip /> <bdi>{drag.label}</bdi>
+        </div>
+      )}
+      {toast && <div className="toast" role="status">{toast}</div>}
+
       {shopOpen && <ShoppingList shopping={shopping} setShopping={setShopping} inventory={inventory} setInventory={setInventory}
         index={index} kids={kids} ingredientNames={ingredientNames} onClose={() => setShopOpen(false)} />}
     </section>
   );
+}
+
+// השם הראשי בשורה: הסוג (וויסקי). המותג — מתחת, בקטן.
+function typeName(it) {
+  if (isReadyKey(it.key)) return it.key.slice(6);
+  return nameMain(it.he);
 }
 
 function amountText(it) {
@@ -216,14 +277,18 @@ function amountText(it) {
   return `${Number(it.amount) || 0} ${UNIT_HE[it.unit || unitOf(it.key)]}`;
 }
 
-function InvRow({ it, sorting, open, dragging, onToggle, onChange, onRemove, onShop, onMove, gripProps }) {
+function InvRow({ it, sorting, open, dragging, dropBefore, dropAfter, pickMode, picked, onPick, onToggle, onChange, onRemove, onShop, onMove, gripProps }) {
   const g = getGroup(it.key);
-  const main = it.brand || nameMain(it.he);
-  const sub = it.brand ? (it.brandHe ? `${it.brandHe} · ${it.he}` : it.he) : nameSub(it.he) || (it.free ? 'מוצר חופשי' : '');
+  const main = typeName(it);
+  const ready = isReadyKey(it.key);
+  const sub = ready ? (it.brand && it.brand !== main ? `קוקטייל מוכן · ${it.brand}` : 'קוקטייל מוכן בבקבוק')
+    : it.brand ? it.brand : nameSub(it.he) || (it.free ? 'מוצר חופשי' : '');
   const low = isLow(it), out = isOut(it);
   return (
-    <div className={`inv-item${out ? ' out' : ''}${dragging ? ' dragging' : ''}${open ? ' open' : ''}`} data-inv-id={it.id}>
+    <div className={`inv-item${out ? ' out' : ''}${dragging ? ' dragging' : ''}${open ? ' open' : ''}${dropBefore ? ' drop-before' : ''}${dropAfter ? ' drop-after' : ''}${pickMode ? ' pickable' : ''}`}
+      data-inv-id={it.id} data-inv-cat={catOf(it)} onClick={pickMode ? onPick : undefined}>
       <div className="inv-line">
+        {pickMode && <span className={`check${picked ? ' on' : ''}`} role="checkbox" aria-checked={picked} aria-label={`הוסף ${main} לקניות`}>{picked && <IconCheck />}</span>}
         {sorting && <span className="grip" aria-hidden="true" {...gripProps}><IconGrip /></span>}
         <span className="dot" style={{ background: g?.color || (isReadyKey(it.key) ? '#C8102E' : '#F2B705') }} />
         <div className="n">
@@ -231,7 +296,9 @@ function InvRow({ it, sorting, open, dragging, onToggle, onChange, onRemove, onS
           {sub && <small><bdi>{sub}</bdi></small>}
           {it.label && !it.brand && <small><bdi>{it.label}</bdi></small>}
         </div>
-        {sorting ? (
+        {pickMode ? (
+          <span className={`amt-pill static${low ? ' low' : ''}${out ? ' out' : ''}`}>{out ? 'נגמר' : amountText(it)}</span>
+        ) : sorting ? (
           <span className="row" style={{ gap: 4 }}>
             <button className="mini" aria-label={`הזז למעלה ${main}`} onClick={() => onMove(-1)}><IconChevron dir="up" /></button>
             <button className="mini" aria-label={`הזז למטה ${main}`} onClick={() => onMove(1)}><IconChevron dir="down" /></button>
@@ -242,7 +309,7 @@ function InvRow({ it, sorting, open, dragging, onToggle, onChange, onRemove, onS
           </button>
         )}
       </div>
-      {open && !sorting && <RowEditor it={it} onChange={onChange} onRemove={onRemove} onShop={onShop} onClose={onToggle} />}
+      {open && !sorting && !pickMode && <RowEditor it={it} onChange={onChange} onRemove={onRemove} onShop={onShop} onClose={onToggle} />}
     </div>
   );
 }
@@ -252,6 +319,8 @@ function RowEditor({ it, onChange, onRemove, onShop, onClose }) {
   const unit = it.unit || unitOf(it.key);
   const id = `amt-${it.id}`;
   useEffect(() => { setVal(it.amount ?? ''); }, [it.amount]);
+  const inputRef = useRef(null);
+  useEffect(() => { const el = inputRef.current; if (el) { el.focus(); el.select(); } }, []);
   const commit = () => onChange({ amount: Math.max(0, Number(val) || 0) });
   return (
     <div className="inv-edit">
@@ -259,7 +328,7 @@ function RowEditor({ it, onChange, onRemove, onShop, onClose }) {
         {!it.unlimited && (
           <>
             <label htmlFor={id} style={{ fontSize: 13, fontWeight: 700 }}>כמות</label>
-            <input id={id} className="amount" type="number" inputMode="decimal" min="0" step={unit === 'pcs' ? 1 : unit === 'g' ? 50 : 10} value={val}
+            <input ref={inputRef} id={id} className="amount" type="number" inputMode="decimal" min="0" step={unit === 'pcs' ? 1 : unit === 'g' ? 50 : 10} value={val}
               onChange={(e) => setVal(e.target.value)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') { commit(); onClose(); } }} />
             <span className="muted" style={{ fontSize: 13 }}>{UNIT_HE[unit]}</span>
           </>

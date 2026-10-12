@@ -16,7 +16,8 @@ export const GROUPS = [
   { key: 'bourbon', he: 'בורבון', kind: 'spirit', color: '#B8691F', aliases: ['bourbon', 'southern comfort', 'wild turkey', 'maker\'s mark'] },
   { key: 'brandy', he: 'ברנדי / קוניאק', kind: 'spirit', color: '#A8521C', aliases: ['brandy', 'cognac', 'pisco', 'apple brandy', 'calvados', 'applejack'] },
   { key: 'cachaca', he: 'קשאסה', kind: 'spirit', color: '#F1EEDD', aliases: ['cachaca'] },
-  { key: 'arak', he: 'ערק / אוזו', kind: 'spirit', color: '#F7F7F2', aliases: ['ouzo', 'anis', 'pernod', 'absinthe', 'pastis', 'anisette', 'sambuca', 'arak'] },
+  { key: 'arak', he: 'ערק', kind: 'spirit', color: '#F7F7F2', aliases: ['arak', 'araq', 'arack', 'arrack'] },
+  { key: 'ouzo', he: 'אוזו (וגם סמבוקה / פרנו / אבסינת)', kind: 'spirit', color: '#F2F4F0', aliases: ['ouzo', 'anis', 'pernod', 'absinthe', 'pastis', 'anisette', 'sambuca', 'ricard'] },
 
   // ---- ליקרים
   { key: 'triple sec', he: 'טריפל סק / קואנטרו', kind: 'liqueur', color: '#FBE7C6', aliases: ['triple sec', 'cointreau', 'grand marnier', 'orange curacao', 'curacao', 'orange liqueur'] },
@@ -142,7 +143,7 @@ export const UNIT_HE = { ml: 'מ״ל', pcs: 'יח׳', g: 'גר׳' };
 
 // ---- אחוז אלכוהול (ABV) משוער לכל קבוצה
 const ABV = {
-  vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40,
+  vodka: 40, gin: 40, 'white rum': 40, 'dark rum': 40, 'coconut rum': 21, tequila: 38, whiskey: 40, bourbon: 45, brandy: 40, cachaca: 40, arak: 40, ouzo: 40,
   'triple sec': 35, 'blue curacao': 25, 'coffee liqueur': 20, 'irish cream': 17, amaretto: 28, campari: 25, aperol: 11, 'sweet vermouth': 16, 'dry vermouth': 18,
   'bianco vermouth': 15, 'elderflower liqueur': 20, limoncello: 28, 'rose wine': 12, 'peach schnapps': 20, 'melon liqueur': 20, 'raspberry liqueur': 16, 'cacao liqueur': 25, 'mint liqueur': 25, 'herbal liqueur': 35, 'other liqueur': 25, angostura: 44,
   'sparkling wine': 12, 'white wine': 12, 'red wine': 14, beer: 5, cider: 5,

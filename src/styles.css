@@ -234,4 +234,32 @@ button { cursor: pointer; }
 .toast.undo { display: flex; align-items: center; gap: 12px; transform: translateX(-50%); font: 700 16px var(--body); max-width: calc(100vw - 32px); }
 .toast.undo button { border: 2px solid var(--yellow); background: transparent; color: var(--yellow); font: 700 15px var(--body); min-height: 36px; padding: 0 12px; }
 .ready-note { margin: 14px 0 0; background: #fff; border: 3px dashed var(--ink); padding: 10px 12px; font-weight: 700; }
-.nav-dot { position: absolute; top: 6px; left: 50%; margin-left: 10px; width: 11px; height: 11px; border-radius: 50%; background: #FFA319; border: 2px solid var(--ink); }
+
+
+/* ---- v1.18: אדום "ב-ג 2" — אדום רך עם נקודות צהובות, טקסט לבן עם הילה */
+:root { --red-soft: #E04A41; --red-dots: radial-gradient(rgba(255, 225, 77, .42) 1.4px, transparent 1.5px); }
+.btn.red, .seg button[aria-pressed='true'], .inv-tools .tool[aria-pressed='true'] {
+  background-color: var(--red-soft); background-image: var(--red-dots); background-size: 8px 8px; color: #fff; text-shadow: 0 0 2px #7A0000, 0 0 2px #7A0000;
+}
+.btn.red:disabled { opacity: .55; }
+/* בלי סימון טקסט / תפריט העתקה על כפתורים ואלמנטים לחיצים */
+button, [role='button'], [role='checkbox'], .chip, .seg, .tabbar, .inv-cat-h, .grip, .stepper, .amt-pill, .check, label { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* מלאי: מצב בחירת מתמעטים */
+.alert-bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; background: #fff; border: 2.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); font-weight: 700; font-size: 14px; }
+.alert-bar span { flex: 1 1 100%; }
+.inv-item.pickable { cursor: pointer; opacity: 1; filter: none; }
+.amt-pill.static { pointer-events: none; }
+/* גרירה */
+.inv-item.dragging { opacity: .25; outline: none; }
+.inv-item.drop-before { box-shadow: 0 -6px 0 -1px var(--red-soft), 3px 3px 0 var(--ink); }
+.inv-item.drop-after { box-shadow: 0 6px 0 -1px var(--red-soft), 3px 3px 0 var(--ink); }
+.drag-ghost { position: fixed; z-index: 60; pointer-events: none; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #fff; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-1.5deg); font-weight: 700; }
+/* מתכון: מונה הכנות */
+.made-count { margin: 12px 0 0; padding: 8px 12px; border: 2.5px dashed var(--ink); background: rgba(255, 225, 77, 0.22); font-weight: 700; font-size: 15px; }
+/* חלון "הכנתי": שורות בגובה קבוע */
+.made-plan .row { flex-wrap: nowrap; min-height: 26px; }
+.made-plan .row > bdi { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.made-plan .qty { flex-shrink: 0; min-width: 150px; text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stepper output { min-width: 80px; font-variant-numeric: tabular-nums; }
+/* חלון אישור כללי */
+.confirm-text { font-size: 17px; font-weight: 700; margin: 0 0 4px; }

@@ -187,7 +187,7 @@ export default function Recipe({ e, uid, fav, rating, tasted, onBack, onFav, onR
                 {photo && <button className="icon-btn" aria-label="מחק תמונה" onClick={async () => { await removePhoto(uid, d.id); setPhoto(null); }}><IconTrash /></button>}
               </div>
               {msg && <p role="status" style={{ fontWeight: 700, margin: '8px 0 0' }}>{msg}</p>}
-              {madeCount > 0 && <p style={{ fontWeight: 700, margin: '10px 0 0' }}>הכנת עד היום {madeCount === 1 ? 'כוס אחת' : `${madeCount} כוסות`} מהקוקטייל הזה</p>}
+              {madeCount > 0 && <p className="made-count">הכנת עד היום {madeCount === 1 ? 'כוס אחת' : `${madeCount} כוסות`} מהקוקטייל הזה</p>}
             </div>
           </div>
         </div>

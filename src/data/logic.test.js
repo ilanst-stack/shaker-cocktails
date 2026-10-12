@@ -185,3 +185,19 @@ test('מתמעט / נגמר וזיהוי מותגים', () => {
   assert.equal(searchBrands('שרידנס')[0].key, 'coffee liqueur');
   assert.equal(ensureIds([{ key: 'gin' }, { key: 'gin' }]).map((x) => x.id).join(), 'k_gin,k_gin_');
 });
+
+import { ingredientOf } from './cocktails.js';
+import { matchDrink as md2, inventoryMap as im3 } from './match.js';
+test('v1.18: כוס = 240 מ״ל, מידה לא ידועה לאלכוהול = 30, בקבוק מוכן, ערק/אוזו', () => {
+  assert.equal(ingredientOf('Light rum', '1/6 glass').ml, 40);
+  const jc = { id: 'j', name: 'Jamaican Coffee', ingredients: [ingredientOf('Light rum', '1/6 glass'), ingredientOf('Coffee', '1/6 glass strong black')] };
+  const r = md2(jc, im3([{ id: 'a', key: 'white rum', unit: 'ml', amount: 100 }, { id: 'b', key: 'coffee', unit: 'ml', unlimited: true }]));
+  assert.equal(r.servings, 2);
+  const odd = { id: 'o', name: 'Odd', ingredients: [{ name: 'Vodka', measure: 'a splosh', ml: null, group: 'vodka', unit: 'ml', amount: null }] };
+  assert.equal(md2(odd, im3([{ id: 'v', key: 'vodka', unit: 'ml', amount: 95 }])).servings, 3);
+  const neg = { id: 'n', name: 'Negroni', ingredients: [ingredientOf('Gin', '1 oz')] };
+  const rn = md2(neg, im3([{ id: 'r', key: 'ready:Negroni', unit: 'ml', amount: 500 }]));
+  assert.equal(rn.ready, true); assert.equal(rn.servings, 5);
+  assert.equal(ingredientOf('Ouzo', '1 oz').group, 'ouzo');
+  assert.equal(ingredientOf('Arak', '1 oz').group, 'arak');
+});

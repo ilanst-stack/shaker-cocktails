@@ -7,17 +7,22 @@ const CACHE_KEY = 'shaker.drinks.v3';
 const CACHE_DAYS = 7;
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz0123456789'.split('');
 
+// מצרך מהמאגר → קבוצה, מ״ל, יחידה וכמות (מחושב מחדש גם על מתכונים מהמטמון, כשהמילון משתנה)
+export function ingredientOf(name, measure) {
+  const g = groupOf(name);
+  const group = g?.key || norm(name);
+  const ml = toMl(measure);
+  const unit = unitOf(group);
+  return { name: name.trim(), measure, ml, group, unit, amount: toAmount(measure, ml, unit, pcsMlOf(group)) };
+}
+
 export function normalizeDrink(d) {
   const ingredients = [];
   for (let i = 1; i <= 15; i++) {
     const name = d[`strIngredient${i}`];
     if (!name || !name.trim()) continue;
     const measure = (d[`strMeasure${i}`] || '').trim();
-    const g = groupOf(name);
-    const group = g?.key || norm(name);
-    const ml = toMl(measure);
-    const unit = unitOf(group);
-    ingredients.push({ name: name.trim(), measure, ml, group, unit, amount: toAmount(measure, ml, unit, pcsMlOf(group)) });
+    ingredients.push(ingredientOf(name, measure));
   }
   return {
     id: d.idDrink,
@@ -42,7 +47,9 @@ export async function loadDrinks({ force = false, onProgress } = {}) {
   if (!force) {
     try {
       const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-      if (cached && Date.now() - cached.at < CACHE_DAYS * 864e5 && cached.drinks?.length) return cached.drinks;
+      if (cached && Date.now() - cached.at < CACHE_DAYS * 864e5 && cached.drinks?.length) {
+        return cached.drinks.map((d) => ({ ...d, ingredients: d.ingredients.map((i) => ingredientOf(i.name, i.measure)) }));
+      }
     } catch { /* מטמון פגום — טוענים מחדש */ }
   }
   const all = [];

@@ -34,7 +34,7 @@ export function useUserData(uid) {
       fav.has(id) ? fav.delete(id) : fav.add(id);
       return save({ favorites: [...fav] });
     },
-    setTasted: (id, on) => save({ tasted: { [id]: on ? Date.now() : deleteField() }, ...(on ? {} : { ratings: { [id]: deleteField() } }) }),
+    setTasted: (id, on) => save({ tasted: { [id]: on ? Date.now() : deleteField() }, ...(on ? {} : { ratings: { [id]: deleteField() }, made: { [id]: deleteField() } }) }),
     setAdult: (adult) => save({ adult }),
     setRating: (id, r) => save({ ratings: { [id]: r }, tasted: { [id]: data?.tasted?.[id] || Date.now() } }),
   };

@@ -30,12 +30,27 @@ export function shopItemFrom(it) {
 
 const qtyMl = (s) => (s.unit === 'bottle' ? (Number(s.qty) || 1) * (Number(s.bottleMl) || 700) : Number(s.qty) || 0);
 const qtyText = (s) => (s.unit === 'bottle' ? `${s.qty} ${Number(s.qty) === 1 ? 'בקבוק' : 'בקבוקים'} · ${s.bottleMl} מ״ל` : `${s.qty} ${UNITS.find((u) => u.id === s.unit)?.he}`);
-const nameOf = (s) => s.brand || s.he;
+const typeOf = (s) => (String(s.key).startsWith('ready:') ? s.key.slice(6) : String(s.he).replace(/\s*\(.*\)\s*$/, ''));
+const nameOf = (s) => (s.brand && s.brand !== typeOf(s) ? `${typeOf(s)} – ${s.brand}` : typeOf(s));
+// יחידות שמתאימות למוצר: נוזל → בקבוק / מ״ל; פירות וביצים → יח׳; סוכר → גר׳
+function unitsFor(s) {
+  if (s.free) return UNITS.filter((u) => u.id !== 'g');
+  const u = unitOf(s.key);
+  if (u === 'pcs') return UNITS.filter((x) => x.id === 'pcs');
+  if (u === 'g') return UNITS.filter((x) => x.id === 'g');
+  return UNITS.filter((x) => x.id === 'bottle' || x.id === 'ml');
+}
+const RLM = '\u200F';
+// שורה ישנה עם יחידה שלא מתאימה (למשל "1 יח׳" לוויסקי) → בקבוקים
+function fixUnit(s) {
+  const allowed = unitsFor(s);
+  return allowed.some((u) => u.id === s.unit) ? s : { ...s, unit: allowed[0].id, bottleMl: s.bottleMl || 700 };
+}
 
 export default function ShoppingList({ shopping, setShopping, inventory, setInventory, index, kids, onClose }) {
   const [q, setQ] = useState('');
   const [toast, setToast] = useState('');
-  const open = shopping.filter((s) => !s.done);
+  const open = shopping.filter((s) => !s.done).map(fixUnit);
   const done = shopping.filter((s) => s.done);
 
   const upd = (id, patch) => setShopping(shopping.map((s) => (s.id === id ? { ...s, ...patch } : s)));
@@ -90,12 +105,47 @@ export default function ShoppingList({ shopping, setShopping, inventory, setInve
     return out;
   }, [q, kids]);
 
-  async function share() {
-    const text = ['רשימת קניות — SHAKE SHAKE', ...open.map((s) => `• ${nameOf(s)} — ${qtyText(s)}`)].join('\n');
+  const [shareOpen, setShareOpen] = useState(false);
+  // טקסט: כל פריט בשורה משלו, עם סימן כיוון ימין-לשמאל בתחילת כל שורה
+  async function shareText() {
+    const lines = [`${RLM}🛒 *רשימת קניות — SHAKE SHAKE*`, '', ...open.map((s) => `${RLM}▫️ ${nameOf(s)} — ${qtyText(s)}`)];
+    const text = lines.join('\n');
+    setShareOpen(false);
     try {
       if (navigator.share) { await navigator.share({ text }); return; }
-    } catch { /* בוטל */ }
+    } catch (e) { if (e?.name === 'AbortError') return; }
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  }
+  // תמונה: הרשימה מצוירת בעיצוב האפליקציה ונשלחת כקובץ
+  async function shareImage() {
+    setShareOpen(false);
+    const W = 1080, rowH = 96, top = 230;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = top + open.length * rowH + 80;
+    const g = c.getContext('2d');
+    g.fillStyle = '#FFE14D'; g.fillRect(0, 0, W, c.height);
+    g.fillStyle = '#F2B705';
+    for (let y = 10; y < c.height; y += 26) for (let x = 10; x < W; x += 26) { g.beginPath(); g.arc(x, y, 3.2, 0, 7); g.fill(); }
+    g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
+    g.fillStyle = '#111'; g.font = '700 92px Karantina, Rubik, sans-serif';
+    g.fillText('רשימת קניות', W - 60, 110);
+    g.font = '600 34px "Kumbh Sans", Rubik, sans-serif'; g.textAlign = 'left'; g.direction = 'ltr';
+    g.fillText('SHAKE SHAKE', 60, 110);
+    open.forEach((s, i) => {
+      const y = top + i * rowH;
+      g.fillStyle = '#111'; g.fillRect(66, y + 6, W - 120, rowH - 18);
+      g.fillStyle = '#fff'; g.fillRect(60, y, W - 120, rowH - 18);
+      g.strokeStyle = '#111'; g.lineWidth = 5; g.strokeRect(60, y, W - 120, rowH - 18);
+      g.direction = 'rtl'; g.textAlign = 'right'; g.fillStyle = '#111';
+      g.font = '700 40px Rubik, sans-serif'; g.fillText(nameOf(s), W - 90, y + (rowH - 18) / 2, W - 520);
+      g.textAlign = 'left'; g.font = '500 34px Rubik, sans-serif'; g.fillText(qtyText(s), 90, y + (rowH - 18) / 2, 380);
+    });
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const file = new File([blob], 'shopping-list.png', { type: 'image/png' });
+    try {
+      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file] }); return; }
+    } catch (e) { if (e?.name === 'AbortError') return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'shopping-list.png'; a.click();
   }
 
   return (
@@ -104,7 +154,7 @@ export default function ShoppingList({ shopping, setShopping, inventory, setInve
         <div className="row" style={{ gap: 10, margin: '8px 0 12px' }}>
           <button className="icon-btn" aria-label="חזרה למלאי" onClick={onClose}><IconBack /></button>
           <h1 id="shop-title" className="h1" style={{ flex: 1 }}>רשימת קניות</h1>
-          {open.length > 0 && <button className="btn" style={{ fontSize: 20, minHeight: 44 }} onClick={share}><IconShare /> שליחה</button>}
+          {open.length > 0 && <button className="btn" style={{ fontSize: 20, minHeight: 44 }} onClick={() => setShareOpen(true)}><IconShare /> שליחה</button>}
         </div>
 
         <div className="panel" style={{ position: 'relative', padding: 10 }}>
@@ -129,15 +179,15 @@ export default function ShoppingList({ shopping, setShopping, inventory, setInve
               <div className="inv-line">
                 <button className="check" aria-label={`נקנה: ${nameOf(s)} — להוסיף למלאי`} onClick={() => bought(s)} />
                 <div className="n">
-                  <bdi>{nameOf(s)}</bdi>
-                  <small><bdi>{s.brand ? `${s.brandHe || ''} · ${s.he}` : s.free ? 'מוצר חופשי' : ''}</bdi></small>
+                  <bdi>{typeOf(s)}</bdi>
+                  {(s.brand && s.brand !== typeOf(s) || s.free) && <small><bdi>{s.brand && s.brand !== typeOf(s) ? s.brand : 'מוצר חופשי'}</bdi></small>}
                 </div>
                 <button className="ghost" aria-label={`הסר ${nameOf(s)} מהרשימה`} onClick={() => del(s.id)}><IconTrash /></button>
               </div>
               <div className="row" style={{ gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                 <input className="amount" type="number" inputMode="decimal" min="0" aria-label="כמות" value={s.qty} onChange={(e) => upd(s.id, { qty: e.target.value })} style={{ width: 70 }} />
                 <select className="field sel" aria-label="יחידה" value={s.unit} onChange={(e) => upd(s.id, { unit: e.target.value, ...(e.target.value === 'bottle' && !s.bottleMl ? { bottleMl: 700 } : {}) })}>
-                  {UNITS.map((u) => <option key={u.id} value={u.id}>{u.he}</option>)}
+                  {unitsFor(s).map((u) => <option key={u.id} value={u.id}>{u.he}</option>)}
                 </select>
                 {s.unit === 'bottle' && (
                   <select className="field sel" aria-label="גודל בקבוק" value={s.bottleMl} onChange={(e) => upd(s.id, { bottleMl: Number(e.target.value) })}>
@@ -179,6 +229,18 @@ export default function ShoppingList({ shopping, setShopping, inventory, setInve
         )}
       </div>
       {toast && <div className="toast" role="status">{toast}</div>}
+      {shareOpen && (
+        <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(e) => { if (e.target === e.currentTarget) setShareOpen(false); }}>
+          <div className="modal panel">
+            <h2 id="share-title" className="h2" style={{ marginTop: 0 }}>איך לשלוח?</h2>
+            <div className="row" style={{ gap: 10, flexDirection: 'column', alignItems: 'stretch' }}>
+              <button className="btn red" onClick={shareText}>כטקסט (ווטסאפ)</button>
+              <button className="btn" onClick={shareImage}>כתמונה</button>
+              <button className="btn" style={{ fontSize: 20 }} onClick={() => setShareOpen(false)}>ביטול</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

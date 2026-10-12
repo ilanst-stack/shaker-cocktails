@@ -60,8 +60,10 @@ export const BRANDS = [
   ]),
   // ---- אניס
   ...B('arak', [
-    ['Arak Elite', 'ערק עלית'], ['Arak Kawar', 'ערק כאוור'], ['Arak Ashkelon', 'ערק אשקלון'], ['Arak Alouk', 'ערק אלוק'], ['Arak Touma', 'ערק תומא'], ['Ouzo 12', 'אוזו 12'],
-    ['Ouzo Plomari', 'אוזו פלומרי'], ['Sambuca Ramazzotti', 'סמבוקה רמזוטי'], ['Sambuca Molinari', 'סמבוקה מולינרי'], ['Pernod', 'פרנו'], ['Ricard', 'ריקאר'], ['Absinthe', 'אבסינת'],
+    ['Arak Elite', 'ערק עלית'], ['Arak Kawar', 'ערק כאוור'], ['Arak Ashkelon', 'ערק אשקלון'], ['Arak Alouk', 'ערק אלוק'], ['Arak Touma', 'ערק תומא'], ['Arak Haddad', 'ערק חדאד'],
+  ]),
+  ...B('ouzo', [
+    ['Ouzo 12', 'אוזו 12'], ['Ouzo Plomari', 'אוזו פלומרי'], ['Ouzo Mini', 'אוזו מיני'], ['Tsantali Ouzo', 'אוזו צנטלי'], ['Sambuca Ramazzotti', 'סמבוקה רמזוטי'], ['Sambuca Molinari', 'סמבוקה מולינרי'], ['Pernod', 'פרנו'], ['Ricard', 'ריקאר'], ['Absinthe', 'אבסינת'],
   ]),
   // ---- ליקרים
   ...B('triple sec', [['Cointreau', 'קואנטרו'], ['Grand Marnier', 'גרנד מרנייה'], ['Bols Triple Sec', 'בולס טריפל סק'], ['De Kuyper Triple Sec', 'דה קויפר טריפל סק'], ['Marie Brizard Triple Sec', 'מארי בריזאר טריפל סק']]),

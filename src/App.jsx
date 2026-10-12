@@ -15,7 +15,7 @@ import Favorites from './components/Favorites.jsx';
 import ForYou from './components/ForYou.jsx';
 import Recipe from './components/Recipe.jsx';
 import MadeDialog from './components/MadeDialog.jsx';
-import { applyChanges, lowThreshold, isLow, isOut } from './data/inventory.js';
+import { applyChanges, lowThreshold, isAdultItem } from './data/inventory.js';
 import { UNIT_HE, unitOf } from './data/ingredients.js';
 import AllCocktails from './components/AllCocktails.jsx';
 import CustomEditor from './components/CustomEditor.jsx';
@@ -67,6 +67,7 @@ function Main({ user }) {
   const [editing, setEditing] = useState(null); // null | 'new' | drink
   const [madeFor, setMadeFor] = useState(null); // קוקטייל שפתוח עליו חלון "הכנתי"
   const [undo, setUndo] = useState(null); // { id, plan, n, msg }
+  const [askLogout, setAskLogout] = useState(false);
   const undoT = useRef(null);
   const custom = useCustomDrinks(user.uid);
 
@@ -97,10 +98,14 @@ function Main({ user }) {
     if (p != null) { if (data.adult !== p) setAdult(p); clearPendingAge(); }
   }, [!!data]); // eslint-disable-line react-hooks/exhaustive-deps
   const kids = adult === false;
-  const visibleInv = useMemo(() => (data ? (kids ? data.inventory.filter((i) => !isAlcoholKey(i.key)) : data.inventory) : []), [data?.inventory, kids]);
-  const setVisibleInv = (vis) => setInventory(kids ? [...data.inventory.filter((i) => isAlcoholKey(i.key)), ...vis] : vis);
+  const visibleInv = useMemo(() => (data ? (kids ? data.inventory.filter((i) => !isAdultItem(i)) : data.inventory) : []), [data?.inventory, kids]);
+  const setVisibleInv = (vis) => setInventory(kids ? [...data.inventory.filter(isAdultItem), ...vis] : vis);
+  const shopAll = data?.shopping || [];
+  const visibleShop = kids ? shopAll.filter((i) => !isAdultItem(i)) : shopAll;
+  const setVisibleShop = (vis) => setShopping(kids ? [...shopAll.filter(isAdultItem), ...vis] : vis);
   const allDrinks = useMemo(() => (drinks ? [...custom, ...drinks] : null), [drinks, custom]);
   const index = useMemo(() => (allDrinks && data ? buildIndex(kids ? allDrinks.filter(isAlcoholFree) : allDrinks, visibleInv) : []), [allDrinks, visibleInv, kids]);
+  const drinkNames = useMemo(() => (drinks && !kids ? drinks.map((d) => d.name) : []), [drinks, kids]);
   const names = useMemo(() => (drinks ? allIngredientNames(drinks).filter((n) => !kids || !isAlcoholName(n)) : []), [drinks, kids]);
 
   if (error) return <Loading text={`שגיאה בגישה לנתונים: ${error.code || error.message}`} />;
@@ -147,12 +152,12 @@ function Main({ user }) {
           {kids && <span className="version" style={{ background: '#9BD34C' }}>מוקטיילים</span>}
         </div>
         <button className="icon-btn" style={{ background: '#1FA3D9', color: '#fff', font: '700 24px var(--display)' }}
-          aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => { if (confirm('להתנתק?')) { resetSticky(); logout(); } }}>
+          aria-label="התנתקות" title={`${user.displayName || ''} — התנתקות`} onClick={() => setAskLogout(true)}>
           {user.photoURL ? <img src={user.photoURL} alt="" width="38" height="38" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" /> : (user.displayName || '?')[0]}
         </button>
       </header>
 
-      {tab === 'inventory' && <Inventory inventory={visibleInv} setInventory={setVisibleInv} ingredientNames={names} kids={kids} shopping={data.shopping || []} setShopping={setShopping} index={index} />}
+      {tab === 'inventory' && <Inventory inventory={visibleInv} setInventory={setVisibleInv} ingredientNames={names} kids={kids} shopping={visibleShop} setShopping={setVisibleShop} index={index} drinkNames={drinkNames} />}
       {tab === 'cocktails' && <CocktailList {...common} inventoryCount={data.inventory.length} />}
       {tab === 'all' && <AllCocktails {...common} />}
       {tab === 'mine' && <Favorites {...common} />}
@@ -162,7 +167,6 @@ function Main({ user }) {
         {TABS.map(({ id, he, Icon }) => (
           <button key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => { setTab(id); window.scrollTo(0, 0); }} style={{ position: 'relative' }}>
             <Icon />{he}
-            {id === 'inventory' && visibleInv.some((i) => isLow(i) || isOut(i)) && <span className="nav-dot" aria-label="יש מצרכים שמתמעטים" />}
           </button>
         ))}
       </nav>
@@ -172,6 +176,19 @@ function Main({ user }) {
           onBack={close} onFav={() => toggleFavorite(opened.drink.id)} onRate={(r) => setRating(opened.drink.id, r)} onTasted={(on) => setTasted(opened.drink.id, on)} onEdit={opened.drink.custom ? () => setEditing(opened.drink) : null}
           madeCount={data.made?.[opened.drink.id] || 0} onMade={() => setMadeFor(opened)}
           readyBottle={data.inventory.find((i) => i.key === `ready:${opened.drink.name}` && !(i.amount <= 0))} />
+      )}
+      {askLogout && (
+        <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="logout-title" onClick={(e) => { if (e.target === e.currentTarget) setAskLogout(false); }}>
+          <div className="modal panel">
+            <h2 id="logout-title" className="h2" style={{ marginTop: 0 }}>להתנתק?</h2>
+            <p className="confirm-text"><bdi>{user.displayName || user.email}</bdi></p>
+            <p style={{ margin: '0 0 14px', fontSize: 14 }}>המלאי, המועדפים והדירוגים נשמרים — יחכו לך בכניסה הבאה.</p>
+            <div className="row" style={{ gap: 10 }}>
+              <button className="btn" style={{ flex: 1 }} onClick={() => setAskLogout(false)}>ביטול</button>
+              <button className="btn red" style={{ flex: 1 }} onClick={() => { setAskLogout(false); resetSticky(); logout(); }}>התנתקות</button>
+            </div>
+          </div>
+        </div>
       )}
       {madeFor && <MadeDialog e={madeFor} inventory={visibleInv} onCancel={() => setMadeFor(null)} onConfirm={(n, plan) => confirmMade(madeFor, n, plan)} />}
       {undo && (

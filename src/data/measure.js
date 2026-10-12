@@ -9,6 +9,7 @@ const UNITS = [
   [/\b(shots?|jiggers?)\b/, 44],
   [/\b(measures?)\b/, 30],
   [/\b(cups?)\b/, 240],
+  [/\b(glass(es)?|mugs?)\b/, 240],
   [/\b(pints?)\b/, 470],
   [/\b(tbsp|tblsp|tablespoons?)\b/, 15],
   [/\b(tsp|teaspoons?)\b/, 5],
@@ -78,11 +79,21 @@ export function fmtNum(x) {
 }
 
 // תצוגת כמות במתכון
+// מידות שנשארו באנגלית ("glass 1/6", "1 slice") → עברית
+const HE_WORDS = [[/\bglass(es)?\b/g, 'כוס'], [/\bcups?\b/g, 'כוס'], [/\bslices?\b/g, 'פרוסה'], [/\bwedges?\b/g, 'פלח'], [/\btwists?\b/g, 'קליפה'],
+  [/\bleaves\b|\bleaf\b/g, 'עלים'], [/\bsprigs?\b/g, 'ענף'], [/\bpinch\b/g, 'קורט'], [/\bscoops?\b/g, 'כדור'], [/\bstrong\b/g, 'חזק'], [/\bblack\b/g, 'שחור'],
+  [/\bhot\b/g, 'חם'], [/\bcold\b/g, 'קר'], [/\bfresh\b/g, 'טרי'], [/\bjuice of\b/g, 'מיץ מ-'], [/\bto taste\b/g, 'לפי הטעם'], [/\bgarnish\b/g, 'לקישוט'], [/\bwhole\b/g, 'שלם'], [/\bpiece\b/g, 'חתיכה']];
+export function measureHe(m) {
+  let s = String(m || '').toLowerCase();
+  for (const [re, he] of HE_WORDS) s = s.replace(re, he);
+  return s.trim();
+}
+
 export function fmtIngredient(ing) {
   if (ing.unit === 'g' && ing.amount) return `${Math.round(ing.amount)} גר׳`;
   if (ing.unit === 'pcs' && ing.amount && !(ing.ml && ing.ml >= 3)) return `${fmtNum(ing.amount)} יח׳`;
   if (ing.ml) return fmtMl(ing.ml);
-  return ing.measure || 'לפי הטעם';
+  return ing.measure ? measureHe(ing.measure) : 'לפי הטעם';
 }
 
 export function fmtMl(ml) {
